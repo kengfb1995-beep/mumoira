@@ -1,16 +1,12 @@
 # MuMoiRa
 
-MuMoiRa is a Next.js application (website) with a separate Cloudflare Worker that runs scheduled maintenance jobs.
+MuMoiRa now deploys as a **single Cloudflare Worker** named `mumoira` using OpenNext (Next.js on Workers), with cron running in the same worker.
 
 ## Architecture
 
-- **Website**: Next.js app in this repository (`src/app/**`)
-- **Scheduler**: Cloudflare Worker (`src/index.ts`) triggered by cron every 15 minutes
-
-This separation is important:
-
-- Your domain (`mumoira.id.vn`) should point to the **website deployment** (Cloudflare Pages)
-- The scheduler worker should run in background and should **not** own your main domain route
+- **Web app**: Next.js (`src/app/**`), served by OpenNext worker output
+- **Cron task**: scheduled trigger every 15 minutes, implemented in `src/cron.ts`
+- **Worker entrypoint**: `src/index.ts` (re-exports OpenNext default fetch + scheduled handler)
 
 ## Local development
 
@@ -20,84 +16,55 @@ Install dependencies:
 npm install
 ```
 
-Run web app locally:
+Run normal Next.js dev server:
 
 ```bash
 npm run dev
 ```
 
-## Worker (cron) commands
-
-Run worker locally with scheduled testing:
+Preview Worker production build locally:
 
 ```bash
-npm run cron:dev
+npm run cf:preview
 ```
 
-Trigger scheduled event manually:
+## Deploy to Cloudflare Workers (no Pages required)
+
+Build and deploy in one command:
 
 ```bash
-npm run cron:trigger
+npm run cf:deploy
 ```
 
-Deploy worker:
+This command builds OpenNext output (`.open-next/**`) and deploys worker `mumoira`.
 
-```bash
-npm run cron:deploy
-```
+## Wrangler config summary
 
-## Cloudflare production setup (recommended)
+`wrangler.toml` is configured for OpenNext:
 
-### 1) Deploy website with Cloudflare Pages
+- `name = "mumoira"`
+- `main = ".open-next/worker.js"`
+- assets binding from `.open-next/assets`
+- service self-reference for cache support
+- cron trigger: `*/15 * * * *`
 
-Create a Pages project connected to this repo:
+## Required env/secrets
 
-- Framework preset: **Next.js**
-- Build command: `npm run build`
+Set these in Cloudflare Worker settings (or Wrangler secrets):
 
-After successful deploy, attach custom domain:
-
-- `mumoira.id.vn`
-- (optional) `www.mumoira.id.vn`
-
-### 2) Deploy scheduler with Cloudflare Workers
-
-Worker config is in `wrangler.toml`:
-
-- Worker name: `mu-moi-ra-cron`
-- Entry: `src/index.ts`
-- Cron: `*/15 * * * *`
-
-Deploy using:
-
-```bash
-npm run cron:deploy
-```
-
-Important:
-
-- Keep Worker without a public route on your main website domain.
-- If you need a route, use a separate subdomain (example: `cron.mumoira.id.vn/*`).
-
-## Environment variables / secrets
-
-Set these for Worker deployment:
-
-- `APP_BASE_URL` (already in `wrangler.toml`)
-- `MAINTENANCE_CRON_SECRET` (secret)
+- `APP_BASE_URL` = `https://mumoira.id.vn`
+- `MAINTENANCE_CRON_SECRET` (required secret)
 - `CRON_ALERT_WEBHOOK_URL` (optional secret)
 
-Set secret values with Wrangler:
+CLI alternative:
 
 ```bash
 npx wrangler secret put MAINTENANCE_CRON_SECRET
 npx wrangler secret put CRON_ALERT_WEBHOOK_URL
 ```
 
-## Why you were seeing plain text on domain
+## Domain routing
 
-If your domain is attached to the Worker, browser requests hit `fetch()` in `src/index.ts`, which returns:
+Use custom domain `mumoira.id.vn` directly on worker `mumoira`.
 
-- `mu-moi-ra scheduler worker is running`
-
-That means traffic bypasses your Next.js website. Attach domain to Pages instead.
+Do not point the domain to a separate text-only cron worker anymore.
