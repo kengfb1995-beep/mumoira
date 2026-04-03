@@ -1,6 +1,7 @@
-name = "mu-moi-ra"
+name = "mu-moi-ra-cron"
 main = "./src/index.ts"
 compatibility_date = "2026-04-03"
+workers_dev = false
 
 [triggers]
 crons = ["*/15 * * * *"]

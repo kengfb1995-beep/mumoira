@@ -1,38 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MuMoiRa
 
-## Getting Started
+MuMoiRa is a Next.js application (website) with a separate Cloudflare Worker that runs scheduled maintenance jobs.
 
-First, run the development server:
+## Architecture
+
+- **Website**: Next.js app in this repository (`src/app/**`)
+- **Scheduler**: Cloudflare Worker (`src/index.ts`) triggered by cron every 15 minutes
+
+This separation is important:
+
+- Your domain (`mumoira.id.vn`) should point to the **website deployment** (Cloudflare Pages)
+- The scheduler worker should run in background and should **not** own your main domain route
+
+## Local development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run web app locally:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Worker (cron) commands
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run worker locally with scheduled testing:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run cron:dev
+```
 
-## Learn More
+Trigger scheduled event manually:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run cron:trigger
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy worker:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run cron:deploy
+```
 
-## Deploy on Vercel
+## Cloudflare production setup (recommended)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1) Deploy website with Cloudflare Pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create a Pages project connected to this repo:
 
-# mumoira
+- Framework preset: **Next.js**
+- Build command: `npm run build`
+
+After successful deploy, attach custom domain:
+
+- `mumoira.id.vn`
+- (optional) `www.mumoira.id.vn`
+
+### 2) Deploy scheduler with Cloudflare Workers
+
+Worker config is in `wrangler.toml`:
+
+- Worker name: `mu-moi-ra-cron`
+- Entry: `src/index.ts`
+- Cron: `*/15 * * * *`
+
+Deploy using:
+
+```bash
+npm run cron:deploy
+```
+
+Important:
+
+- Keep Worker without a public route on your main website domain.
+- If you need a route, use a separate subdomain (example: `cron.mumoira.id.vn/*`).
+
+## Environment variables / secrets
+
+Set these for Worker deployment:
+
+- `APP_BASE_URL` (already in `wrangler.toml`)
+- `MAINTENANCE_CRON_SECRET` (secret)
+- `CRON_ALERT_WEBHOOK_URL` (optional secret)
+
+Set secret values with Wrangler:
+
+```bash
+npx wrangler secret put MAINTENANCE_CRON_SECRET
+npx wrangler secret put CRON_ALERT_WEBHOOK_URL
+```
+
+## Why you were seeing plain text on domain
+
+If your domain is attached to the Worker, browser requests hit `fetch()` in `src/index.ts`, which returns:
+
+- `mu-moi-ra scheduler worker is running`
+
+That means traffic bypasses your Next.js website. Attach domain to Pages instead.
