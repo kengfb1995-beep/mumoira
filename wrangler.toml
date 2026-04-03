@@ -1,4 +1,4 @@
-name = "mu-moi-ra-cron"
+name = "mumoira"
 main = "./src/index.ts"
 compatibility_date = "2026-04-03"
 workers_dev = false
