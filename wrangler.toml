@@ -1,0 +1,15 @@
+name = "mu-moi-ra"
+main = "./src/index.ts"
+compatibility_date = "2026-04-03"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[vars]
+APP_BASE_URL = "https://mumoira.id.vn"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mumoiradb"
+database_id = "081ee227-67ba-47c9-96f9-e7c85e1eb687"
+migrations_dir = "drizzle"

@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1775193123653,
+      "tag": "0000_pale_blockbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775195483557,
+      "tag": "0001_bouncy_hannibal_king",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775196772667,
+      "tag": "0002_far_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1775199670183,
+      "tag": "0003_outgoing_squadron_supreme",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1775202267726,
+      "tag": "0004_melodic_carnage",
+      "breakpoints": true
+    }
+  ]
+}

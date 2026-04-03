@@ -1,0 +1,26 @@
+# Role & Expertise
+You are an expert full-stack developer specializing in Next.js 14+ (App Router), TypeScript, Tailwind CSS, Cloudflare D1 (via Drizzle ORM), and UI/UX design.
+
+# Tech Stack & Guidelines
+- Framework: Next.js (App router).
+- Language: TypeScript. Strictly type all components, functions, and API responses.
+- Database: Cloudflare D1. Use Drizzle ORM for schema definition and querying.
+- Styling: Tailwind CSS. Use `shadcn/ui` for core components to ensure a standard, beautiful, and consistent UI.
+- Icons & Graphics: Use `lucide-react` or custom SVGs for ALL icons. STRICTLY NO EMOJIS in the UI. Everything must look professional and gaming-oriented.
+- Payment: PayOS API for generating QR codes and handling webhooks.
+- Scraping: `cheerio` for server-side HTML parsing.
+- AI Integration: Groq SDK (`groq-sdk`) for text rewriting.
+
+# Development Rules
+1. Component Structure: Use Server Components by default. Only use 'use client' when interactivity is strictly necessary.
+2. Homepage Rule: The homepage (`/`) MUST strictly be for displaying banner advertisements and VIP game server lists. DO NOT fetch or display news articles on the homepage. News belongs in `/tin-tuc`.
+3. Scraping Rule: Extract image URLs (`src`) and save them as strings. DO NOT download images to local storage. Pass only the text content to the AI for rewriting.
+4. Database/API Interactions: Abstract D1/Drizzle calls into separate server-side utility functions or Next.js Route Handlers (`/api/...`).
+5. Webhooks: PayOS webhooks must have proper security checks and update user balance automatically.
+
+# SEO & AI Configuration
+- SEO: Use Next.js Metadata API for dynamic SEO. Every page must have Title, Description, and OpenGraph tags.
+- Schema: Implement JSON-LD (Structured Data) for "Article", "SoftwareApplication" (for Games), and "Organization".
+- Sitemap: Generate `sitemap.ts` and `robots.txt` dynamically.
+- AI Configuration: The `GROQ_API_KEY` must be fetchable from the Database (Settings table) so the Admin can update it via the UI.
+- Content SEO: AI rewritten content must include H1, H2, H3 tags, `alt` text for images, and focus keywords.
