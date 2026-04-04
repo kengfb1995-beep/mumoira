@@ -1,0 +1,40 @@
+name: Deploy Cloudflare Workers (OpenNext)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure latest Cloudflare build tools
+        run: npm i -D @opennextjs/cloudflare@latest wrangler@latest
+
+      - name: Build OpenNext for Cloudflare
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy to Cloudflare Workers
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          SETTINGS_ENCRYPTION_KEY: ${{ secrets.SETTINGS_ENCRYPTION_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
