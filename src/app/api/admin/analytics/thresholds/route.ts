@@ -32,26 +32,41 @@ async function upsertSetting(key: string, value: string) {
 }
 
 export async function GET() {
-  const session = await requireAdminRole();
+  let session;
+  try {
+    session = await requireAdminRole();
+  } catch {
+    return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+  }
   if (!session) {
     return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
   }
 
-  const db = getDb();
-  const rows = await db
-    .select({ key: settings.key, value: settings.value })
-    .from(settings)
-    .where(inArray(settings.key, [KEYS.minSuccessRate, KEYS.maxAvgDurationMs, KEYS.maxWebhookRejects]));
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({ key: settings.key, value: settings.value })
+      .from(settings)
+      .where(inArray(settings.key, [KEYS.minSuccessRate, KEYS.maxAvgDurationMs, KEYS.maxWebhookRejects]));
 
-  const minSuccessRate = Number(rows.find((r) => r.key === KEYS.minSuccessRate)?.value ?? "95");
-  const maxAvgDurationMs = Number(rows.find((r) => r.key === KEYS.maxAvgDurationMs)?.value ?? "4000");
-  const maxWebhookRejects = Number(rows.find((r) => r.key === KEYS.maxWebhookRejects)?.value ?? "3");
+    const minSuccessRate = Number(rows.find((r) => r.key === KEYS.minSuccessRate)?.value ?? "95");
+    const maxAvgDurationMs = Number(rows.find((r) => r.key === KEYS.maxAvgDurationMs)?.value ?? "4000");
+    const maxWebhookRejects = Number(rows.find((r) => r.key === KEYS.maxWebhookRejects)?.value ?? "3");
 
-  return NextResponse.json({ minSuccessRate, maxAvgDurationMs, maxWebhookRejects });
+    return NextResponse.json({ minSuccessRate, maxAvgDurationMs, maxWebhookRejects });
+  } catch (error) {
+    console.error("[/api/admin/analytics/thresholds GET]", error);
+    return NextResponse.json({ message: "Lỗi nội bộ" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  const session = await requireSuperAdminRole();
+  let session;
+  try {
+    session = await requireSuperAdminRole();
+  } catch {
+    return NextResponse.json({ message: "Chỉ super_admin mới được cập nhật ngưỡng" }, { status: 403 });
+  }
   if (!session) {
     return NextResponse.json({ message: "Chỉ super_admin mới được cập nhật ngưỡng" }, { status: 403 });
   }

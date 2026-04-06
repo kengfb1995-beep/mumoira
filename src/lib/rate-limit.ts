@@ -7,6 +7,36 @@ type Bucket = {
 
 const memoryStore = new Map<string, Bucket>();
 
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL_MS = 60_000;
+const CLEANUP_MAX_ENTRIES = 5000;
+
+function pruneExpiredEntries() {
+  const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL_MS && memoryStore.size < CLEANUP_MAX_ENTRIES) {
+    return;
+  }
+  lastCleanup = now;
+
+  if (memoryStore.size >= CLEANUP_MAX_ENTRIES) {
+    for (const key of memoryStore.keys()) {
+      const bucket = memoryStore.get(key)!;
+      if (bucket.expiresAt <= now) {
+        memoryStore.delete(key);
+      }
+      if (memoryStore.size < CLEANUP_MAX_ENTRIES / 2) break;
+    }
+    return;
+  }
+
+  for (const key of [...memoryStore.keys()]) {
+    const bucket = memoryStore.get(key);
+    if (!bucket || bucket.expiresAt <= now) {
+      memoryStore.delete(key);
+    }
+  }
+}
+
 export function getClientIp(req: Request) {
   const forwardedFor = req.headers.get("x-forwarded-for");
   if (forwardedFor) {
@@ -21,6 +51,8 @@ export function enforceRateLimit(input: {
   limit: number;
   windowMs: number;
 }) {
+  pruneExpiredEntries();
+
   const now = Date.now();
   const found = memoryStore.get(input.key);
 

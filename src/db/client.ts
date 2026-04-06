@@ -1,16 +1,20 @@
-import { drizzle } from "drizzle-orm/d1";
-import type { DrizzleD1Database } from "drizzle-orm/d1";
+/// <reference types="@cloudflare/workers-types" />
+import { createClient } from "@libsql/client/http";
+import { drizzle as drizzleLibsql } from "drizzle-orm/libsql";
+import { drizzle as drizzleD1 } from "drizzle-orm/d1";
 import * as schema from "@/db/schema";
 
-export type D1DatabaseBinding = {
-  prepare: (query: string) => unknown;
-  dump: () => Promise<ArrayBuffer>;
-  batch: <T = unknown>(statements: unknown[]) => Promise<T[]>;
-  exec: (query: string) => Promise<unknown>;
-};
+export type AppDb = ReturnType<typeof createTursoDb> | ReturnType<typeof createD1Db>;
 
-export type AppDb = DrizzleD1Database<typeof schema>;
+export function createTursoDb(url: string, authToken?: string) {
+  const client = createClient({
+    url,
+    authToken,
+  });
 
-export function createDb(db: D1DatabaseBinding): AppDb {
-  return drizzle(db as never, { schema });
+  return drizzleLibsql(client, { schema });
+}
+
+export function createD1Db(d1: D1Database) {
+  return drizzleD1(d1, { schema });
 }

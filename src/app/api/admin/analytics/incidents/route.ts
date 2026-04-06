@@ -23,16 +23,22 @@ function daysAgoStart(days: number) {
 }
 
 export async function GET(req: Request) {
-  const session = await getSession();
+  let session;
+  try {
+    session = await getSession();
+  } catch {
+    return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+  }
   if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
   }
 
-  const searchParams = new URL(req.url).searchParams;
-  const days = clampDays(searchParams.get("days"));
-  const page = clampPage(searchParams.get("page"));
-  const statusFilter = searchParams.get("status")?.trim();
-  const breachedOnly = searchParams.get("breached") === "1";
+  try {
+    const searchParams = new URL(req.url).searchParams;
+    const days = clampDays(searchParams.get("days"));
+    const page = clampPage(searchParams.get("page"));
+    const statusFilter = searchParams.get("status")?.trim();
+    const breachedOnly = searchParams.get("breached") === "1";
 
   const pageSize = 20;
   const offset = (page - 1) * pageSize;
@@ -71,8 +77,10 @@ export async function GET(req: Request) {
         slaDueAt: incidentAcks.slaDueAt,
         assignedToUserId: incidentAcks.assignedToUserId,
         acknowledgedByUserId: incidentAcks.acknowledgedByUserId,
+        createdAt: incidentAcks.createdAt,
       })
-      .from(incidentAcks),
+      .from(incidentAcks)
+      .where(gte(incidentAcks.createdAt, fromDate)),
   ]);
 
   const userIds = ackRows
@@ -143,4 +151,8 @@ export async function GET(req: Request) {
     },
     items,
   });
+  } catch (error) {
+    console.error("[/api/admin/analytics/incidents]", error);
+    return NextResponse.json({ message: "Lỗi nội bộ. Vui lòng thử lại." }, { status: 500 });
+  }
 }

@@ -1,37 +1,34 @@
-import { createDb, type D1DatabaseBinding } from "@/db/client";
+/// <reference types="@cloudflare/workers-types" />
+import { createD1Db, createTursoDb } from "@/db/client";
 
-function getD1Binding(): D1DatabaseBinding {
-  const maybeBinding = (globalThis as { DB?: D1DatabaseBinding }).DB;
+let cachedDb: any = null;
+let isInitializing = false;
 
-  if (!maybeBinding) {
-    const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
-    if (isBuildPhase) {
-      return {
-        prepare() {
-          return {
-            bind() {
-              return this;
-            },
-            first: async () => null,
-            run: async () => ({ success: true }),
-            all: async () => ({ results: [] }),
-            raw: async () => [],
-          };
-        },
-        batch: async () => [],
-        exec: async () => ({ count: 0, duration: 0 }),
-        dump: async () => new ArrayBuffer(0),
-      } as unknown as D1DatabaseBinding;
-    }
-
-    throw new Error(
-      "Thiếu D1 binding `DB`. Hãy chạy app trên Cloudflare Workers hoặc gán globalThis.DB trong môi trường dev.",
-    );
+export function getDb(): any {
+  if (cachedDb) return cachedDb;
+  if (isInitializing) {
+    console.error("Antigravity: Recursive getDb() detected!");
+    return null; // Tránh treo
   }
-
-  return maybeBinding;
-}
-
-export function getDb() {
-  return createDb(getD1Binding());
+  
+  isInitializing = true;
+  try {
+    // Ưu tiên dùng Cloudflare D1 nếu có binding
+    const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+    const d1 = (context?.env?.DB || (globalThis as any).DB) as D1Database | undefined;
+    
+    if (d1 && typeof d1.prepare === "function") {
+      cachedDb = createD1Db(d1);
+    } else {
+      const tursoUrl = process.env.TURSO_DATABASE_URL;
+      if (!tursoUrl) throw new Error("Thiếu DB");
+      cachedDb = createTursoDb(tursoUrl, process.env.TURSO_AUTH_TOKEN);
+    }
+  } catch (e) {
+    console.error("Antigravity: getDb error", e);
+  } finally {
+    isInitializing = false;
+  }
+  
+  return cachedDb;
 }

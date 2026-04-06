@@ -3,8 +3,8 @@ import { z } from "zod";
 import { logAdminAudit } from "@/lib/audit";
 import { assertCsrf } from "@/lib/csrf";
 import { enforceRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
-import { upsertSecureSetting } from "@/lib/secure-settings";
 import { getSession } from "@/lib/session";
+import { upsertSecureSetting } from "@/lib/secure-settings";
 
 const payloadSchema = z.object({
   value: z.string().min(10),
@@ -12,9 +12,21 @@ const payloadSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const session = await getSession();
-    const ip = getClientIp(req);
+    let session;
+    try {
+      session = await getSession();
+    } catch {
+      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+    }
+    if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
+      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+    }
 
+    if (!assertCsrf(req)) {
+      return NextResponse.json({ message: "CSRF token không hợp lệ" }, { status: 403 });
+    }
+
+    const ip = getClientIp(req);
     const guard = enforceRateLimit({
       key: `admin:groq:${ip}`,
       limit: 20,
@@ -23,13 +35,6 @@ export async function POST(req: Request) {
 
     if (!guard.allowed) {
       return rateLimitResponse(guard.retryAfterMs);
-    }
-    if (!session || session.role !== "admin") {
-      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
-    }
-
-    if (!assertCsrf(req)) {
-      return NextResponse.json({ message: "CSRF token không hợp lệ" }, { status: 403 });
     }
 
     const payload = payloadSchema.parse(await req.json());
@@ -49,6 +54,6 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ message: "Dữ liệu không hợp lệ", issues: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ message: "Không thể cập nhật GROQ key" }, { status: 500 });
+    return NextResponse.json({ message: "Không thể cập nhật Groq key" }, { status: 500 });
   }
 }

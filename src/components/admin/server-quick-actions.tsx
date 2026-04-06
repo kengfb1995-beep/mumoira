@@ -7,7 +7,7 @@ import { withCsrfHeaders } from "@/lib/csrf-client";
 type ServerRow = {
   id: number;
   name: string;
-  status: "draft" | "pending" | "active" | "archived";
+  status: "draft" | "pending" | "active" | "archived" | "rejected";
   vipPackageType: "none" | "vip_silver" | "vip_gold";
 };
 

@@ -27,13 +27,18 @@ export const servers = sqliteTable("servers", {
   openBetaDate: integer("open_beta_date", { mode: "timestamp_ms" }),
   alphaTestDate: integer("alpha_test_date", { mode: "timestamp_ms" }),
   websiteUrl: text("website_url").notNull(),
+  content: text("content").notNull().default(""),
+  seoKeywords: text("seo_keywords").notNull().default(""),
+  slug: text("slug").notNull().default(""),
   bannerUrl: text("banner_url"),
+  facebookUrl: text("facebook_url"),
+  zaloUrl: text("zalo_url"),
   vipPackageType: text("vip_package_type", {
     enum: ["vip_gold", "vip_silver", "none"],
   })
     .notNull()
     .default("none"),
-  status: text("status", { enum: ["draft", "pending", "active", "archived"] })
+  status: text("status", { enum: ["draft", "pending", "active", "archived", "rejected"] })
     .notNull()
     .default("pending"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -70,9 +75,21 @@ export const banners = sqliteTable("banners", {
 export const posts = sqliteTable("posts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  slug: text("slug").notNull().unique().default(""),
   content: text("content").notNull(),
+  seoKeywords: text("seo_keywords").notNull().default(""),
   originalUrl: text("original_url"),
   thumbnailUrl: text("thumbnail_url"),
+  author: text("author").notNull().default(""),
+  tags: text("tags").notNull().default(""),
+  category: text("category").notNull().default(""),
+  giftcodeGameId: integer("giftcode_game_id"),
+  isHot: integer("is_hot", { mode: "boolean" }).notNull().default(false),
+  isFeatured: integer("is_featured", { mode: "boolean" }).notNull().default(false),
+  status: text("status", { enum: ["published", "draft"] }).notNull().default("published"),
+  innerImages: text("inner_images"), // newline separated
+  seoTitle: text("seo_title"),
+  seoDescription: text("seo_description"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),

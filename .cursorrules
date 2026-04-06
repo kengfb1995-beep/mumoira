@@ -1,26 +1,19 @@
-# Role & Expertise
-You are an expert full-stack developer specializing in Next.js 14+ (App Router), TypeScript, Tailwind CSS, Cloudflare D1 (via Drizzle ORM), and UI/UX design.
+Act as an expert Expert Frontend Developer. I want to redesign the UI and layout of my authentication pages (Login & Register) to closely match the design of the provided screenshot/reference from `https://mumoira.tv`.
 
-# Tech Stack & Guidelines
-- Framework: Next.js (App router).
-- Language: TypeScript. Strictly type all components, functions, and API responses.
-- Database: Cloudflare D1. Use Drizzle ORM for schema definition and querying.
-- Styling: Tailwind CSS. Use `shadcn/ui` for core components to ensure a standard, beautiful, and consistent UI.
-- Icons & Graphics: Use `lucide-react` or custom SVGs for ALL icons. STRICTLY NO EMOJIS in the UI. Everything must look professional and gaming-oriented.
-- Payment: PayOS API for generating QR codes and handling webhooks.
-- Scraping: `cheerio` for server-side HTML parsing.
-- AI Integration: Groq SDK (`groq-sdk`) for text rewriting.
+Here are the CRITICAL RULES you must follow:
+1. STRICTLY PRESERVE ALL LOGIC: Do not touch, alter, or remove any existing business logic, state management (e.g., useState, hooks), API calls, validation logic, routing, or event handlers (onSubmit, onChange, onClick).
+2. ONLY UPDATE UI/UX: Your job is purely to change the HTML/JSX structure and the styling (classes/CSS) to match the target design.
+3. MATCH THE TARGET DESIGN: Apply the visual style of mumoira.tv based on my description and attached images. This includes:
+   - Dark mode background and specific color palettes.
+   - Layout structure (e.g., centered modal or split screen).
+   - Input field styles, typography, buttons, and hover/focus effects.
+4. TECH STACK: Use [Điền framework CSS của bạn vào đây, ví dụ: Tailwind CSS / SCSS / Bootstrap] for styling.
+5. RESPONSIVE: Ensure the new UI looks good on both mobile and desktop.
 
-# Development Rules
-1. Component Structure: Use Server Components by default. Only use 'use client' when interactivity is strictly necessary.
-2. Homepage Rule: The homepage (`/`) MUST strictly be for displaying banner advertisements and VIP game server lists. DO NOT fetch or display news articles on the homepage. News belongs in `/tin-tuc`.
-3. Scraping Rule: Extract image URLs (`src`) and save them as strings. DO NOT download images to local storage. Pass only the text content to the AI for rewriting.
-4. Database/API Interactions: Abstract D1/Drizzle calls into separate server-side utility functions or Next.js Route Handlers (`/api/...`).
-5. Webhooks: PayOS webhooks must have proper security checks and update user balance automatically.
+Instructions:
+- Review the code in the files I have tagged.
+- Identify the logic layer and separate it from the UI layer mentally.
+- Rewrite the render/return portion with the new beautiful UI while mapping the exact same state variables and functions to the new inputs and buttons.
+- Do not generate dummy logic; use what is already there.
 
-# SEO & AI Configuration
-- SEO: Use Next.js Metadata API for dynamic SEO. Every page must have Title, Description, and OpenGraph tags.
-- Schema: Implement JSON-LD (Structured Data) for "Article", "SoftwareApplication" (for Games), and "Organization".
-- Sitemap: Generate `sitemap.ts` and `robots.txt` dynamically.
-- AI Configuration: The `GROQ_API_KEY` must be fetchable from the Database (Settings table) so the Admin can update it via the UI.
-- Content SEO: AI rewritten content must include H1, H2, H3 tags, `alt` text for images, and focus keywords.
+Please output the updated code.

@@ -26,75 +26,85 @@ function escapeCsv(value: string | number | boolean | null | undefined) {
 }
 
 export async function GET(req: Request) {
-  const session = await getSession();
-  if (!session || session.role !== "admin") {
+  let session;
+  try {
+    session = await getSession();
+  } catch {
+    return new Response("Forbidden", { status: 403 });
+  }
+  if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return new Response("Forbidden", { status: 403 });
   }
 
-  const searchParams = new URL(req.url).searchParams;
-  const days = clampDays(searchParams.get("days"));
-  const taskName = searchParams.get("taskName")?.trim() || "all";
+  try {
+    const searchParams = new URL(req.url).searchParams;
+    const days = clampDays(searchParams.get("days"));
+    const taskName = searchParams.get("taskName")?.trim() || "all";
 
-  const db = getDb();
-  const fromDate = new Date(daysAgoStart(days));
-  const where =
-    taskName === "all"
-      ? gte(cronRuns.createdAt, fromDate)
-      : and(gte(cronRuns.createdAt, fromDate), eq(cronRuns.taskName, taskName));
+    const db = getDb();
+    const fromDate = new Date(daysAgoStart(days));
+    const where =
+      taskName === "all"
+        ? gte(cronRuns.createdAt, fromDate)
+        : and(gte(cronRuns.createdAt, fromDate), eq(cronRuns.taskName, taskName));
 
-  const rows = await db
-    .select({
-      id: cronRuns.id,
-      taskName: cronRuns.taskName,
-      success: cronRuns.success,
-      statusCode: cronRuns.statusCode,
-      processedCount: cronRuns.processedCount,
-      durationMs: cronRuns.durationMs,
-      errorMessage: cronRuns.errorMessage,
-      runDate: cronRuns.runDate,
-      createdAt: cronRuns.createdAt,
-    })
-    .from(cronRuns)
-    .where(where)
-    .orderBy(sql`${cronRuns.createdAt} desc`);
+    const rows = await db
+      .select({
+        id: cronRuns.id,
+        taskName: cronRuns.taskName,
+        success: cronRuns.success,
+        statusCode: cronRuns.statusCode,
+        processedCount: cronRuns.processedCount,
+        durationMs: cronRuns.durationMs,
+        errorMessage: cronRuns.errorMessage,
+        runDate: cronRuns.runDate,
+        createdAt: cronRuns.createdAt,
+      })
+      .from(cronRuns)
+      .where(where)
+      .orderBy(sql`${cronRuns.createdAt} desc`);
 
-  const header = [
-    "id",
-    "taskName",
-    "success",
-    "statusCode",
-    "processedCount",
-    "durationMs",
-    "errorMessage",
-    "runDate",
-    "createdAt",
-  ].join(",");
+    const header = [
+      "id",
+      "taskName",
+      "success",
+      "statusCode",
+      "processedCount",
+      "durationMs",
+      "errorMessage",
+      "runDate",
+      "createdAt",
+    ].join(",");
 
-  const body = rows
-    .map((row) =>
-      [
-        row.id,
-        row.taskName,
-        row.success,
-        row.statusCode,
-        row.processedCount,
-        row.durationMs,
-        row.errorMessage,
-        row.runDate,
-        new Date(row.createdAt).toISOString(),
-      ]
-        .map(escapeCsv)
-        .join(","),
-    )
-    .join("\n");
+    const body = rows
+      .map((row) =>
+        [
+          row.id,
+          row.taskName,
+          row.success,
+          row.statusCode,
+          row.processedCount,
+          row.durationMs,
+          row.errorMessage,
+          row.runDate,
+          new Date(row.createdAt).toISOString(),
+        ]
+          .map(escapeCsv)
+          .join(","),
+      )
+      .join("\n");
 
-  const csv = `${header}\n${body}`;
+    const csv = `${header}\n${body}`;
 
-  return new Response(csv, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="cron-analytics-${taskName}-${days}d-${new Date().toISOString().slice(0, 10)}.csv"`,
-    },
-  });
+    return new Response(csv, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="cron-analytics-${taskName}-${days}d-${new Date().toISOString().slice(0, 10)}.csv"`,
+      },
+    });
+  } catch (error) {
+    console.error("[/api/admin/analytics/export]", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }

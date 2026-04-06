@@ -5,6 +5,8 @@ import { servers, transactions, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { enforceRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { getSession } from "@/lib/session";
+import { slugifyVietnamese } from "@/lib/seo";
+import { parseDatetimeLocalAsVietnam } from "@/lib/vn-datetime";
 
 const CREATE_SERVER_FEE = 5000;
 
@@ -13,10 +15,13 @@ const createServerSchema = z.object({
   version: z.string().min(1).max(30),
   exp: z.string().min(1).max(30),
   drop: z.string().min(1).max(30),
-  websiteUrl: z.url(),
-  bannerUrl: z.string().url().optional().or(z.literal("")),
+  websiteUrl: z.string().refine((v) => /^https?:\/\/.+/.test(v), "Must be a valid URL starting with http:// or https://"),
+  content: z.string().min(30).max(10000),
+  seoKeywords: z.string().min(3).max(500),
   openBetaDate: z.string().min(16),
   alphaTestDate: z.string().min(16),
+  facebookUrl: z.string().max(300).optional(),
+  zaloUrl: z.string().max(200).optional(),
 });
 
 const updateDateSchema = z.object({
@@ -62,6 +67,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Số dư không đủ, cần tối thiểu 5.000đ để đăng server" }, { status: 400 });
     }
 
+    const baseSlug = slugifyVietnamese(body.name);
     const inserted = await db
       .insert(servers)
       .values({
@@ -71,10 +77,15 @@ export async function POST(req: Request) {
         exp: body.exp,
         drop: body.drop,
         websiteUrl: body.websiteUrl,
-        bannerUrl: body.bannerUrl || null,
-        openBetaDate: new Date(body.openBetaDate),
-        alphaTestDate: new Date(body.alphaTestDate),
+        content: body.content,
+        seoKeywords: body.seoKeywords,
+        bannerUrl: null,
+        openBetaDate: parseDatetimeLocalAsVietnam(body.openBetaDate),
+        alphaTestDate: parseDatetimeLocalAsVietnam(body.alphaTestDate),
+        facebookUrl: body.facebookUrl || null,
+        zaloUrl: body.zaloUrl || null,
         status: "pending",
+        slug: baseSlug,
       })
       .returning({ id: servers.id, name: servers.name });
 
@@ -89,7 +100,7 @@ export async function POST(req: Request) {
       status: "success",
       serviceType: "topup",
       referenceId: inserted[0]?.id,
-      description: "Phí đăng server mới (5.000đ)",
+      description: `Phí đăng server mới (5.000đ)`,
     });
 
     return NextResponse.json({ ok: true, server: inserted[0] });
@@ -125,8 +136,8 @@ export async function PATCH(req: Request) {
     await db
       .update(servers)
       .set({
-        openBetaDate: new Date(body.openBetaDate),
-        alphaTestDate: new Date(body.alphaTestDate),
+        openBetaDate: parseDatetimeLocalAsVietnam(body.openBetaDate),
+        alphaTestDate: parseDatetimeLocalAsVietnam(body.alphaTestDate),
       })
       .where(eq(servers.id, body.id));
 

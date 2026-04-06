@@ -1,30 +1,84 @@
-import Link from "next/link";
+import { and, desc, eq, gt } from "drizzle-orm";
+import { Sparkles } from "lucide-react";
+import { banners } from "@/db/schema";
+import { BANNER_SIDE, BANNER_VIP_GOLD } from "@/lib/banner-config";
+import { getDb } from "@/lib/db";
+
+const SIDE_SLOT_COUNT = 3;
 
 type SideBannerProps = {
   side: "left" | "right";
 };
 
-export function SideBanner({ side }: SideBannerProps) {
-  const isLeft = side === "left";
+function isMp4Url(url: string) {
+  return /\.mp4(\?.*)?$/i.test(url);
+}
+
+export async function SideBanner({ side }: SideBannerProps) {
+  const db = getDb();
+  const position = side === "left" ? "left_sidebar" : "right_sidebar";
+
+  const sideBanners = await db
+    .select({
+      id: banners.id,
+      imageUrl: banners.imageUrl,
+      targetUrl: banners.targetUrl,
+    })
+    .from(banners)
+    .where(and(eq(banners.position, position), eq(banners.status, "active"), gt(banners.endDate, new Date())))
+    .orderBy(desc(banners.id))
+    .limit(SIDE_SLOT_COUNT);
+
+  const slots: ({ id: number; imageUrl: string; targetUrl: string } | null)[] = sideBanners.slice(0, SIDE_SLOT_COUNT);
+  while (slots.length < SIDE_SLOT_COUNT) slots.push(null);
 
   return (
-    <aside className="sticky top-[88px] hidden h-[calc(100vh-110px)] w-[180px] xl:block">
-      <Link
-        href="#"
-        className="group relative flex h-full overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-b from-[#2b0d0d] via-[#130909] to-[#090505]"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,215,128,0.25),_transparent_55%)]" />
-        <div className="relative flex h-full w-full flex-col items-center justify-between px-4 py-8 text-center">
-          <p className="text-xs uppercase tracking-[0.35em] text-amber-400/80">Banner {isLeft ? "Trái" : "Phải"}</p>
-          <div>
-            <p className="text-2xl font-extrabold text-amber-200">MU PRIVATE</p>
-            <p className="mt-3 text-sm text-zinc-200/90">Vị trí quảng cáo nổi bật cho server mới ra mắt.</p>
-          </div>
-          <p className="rounded-md border border-amber-500/30 bg-black/30 px-3 py-2 text-xs text-amber-100">
-            180 x 720
-          </p>
-        </div>
-      </Link>
+    <aside className="sticky top-[88px] hidden shrink-0 xl:block" style={{ width: BANNER_SIDE.w }}>
+      <div className="space-y-2">
+        {slots.map((banner, idx) =>
+          banner ? (
+            <a
+              key={banner.id}
+              href={banner.targetUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="flex w-full items-center justify-center overflow-hidden rounded-lg border border-amber-500/25 bg-gradient-to-b from-[#120a0a] to-[#0a0505]"
+              style={{ aspectRatio: `${BANNER_SIDE.w} / ${BANNER_SIDE.h}` }}
+            >
+              {isMp4Url(banner.imageUrl) ? (
+                <video
+                  src={banner.imageUrl}
+                  className="max-h-full max-w-full object-contain"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={banner.imageUrl}
+                  alt={`Banner ${side} #${banner.id}`}
+                  width={BANNER_SIDE.w}
+                  height={BANNER_SIDE.h}
+                  className="max-h-full max-w-full object-contain"
+                  loading="lazy"
+                />
+              )}
+            </a>
+          ) : (
+            <div
+              key={`empty-${side}-${idx}`}
+              className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-amber-500/35 bg-black/30 text-center"
+              style={{ aspectRatio: `${BANNER_SIDE.w} / ${BANNER_SIDE.h}` }}
+            >
+              <Sparkles className="h-4 w-4 text-amber-400/70" aria-hidden="true" />
+              <p className="text-[10px] font-medium leading-tight text-amber-100/90">Trống</p>
+            </div>
+          ),
+        )}
+      </div>
     </aside>
   );
 }

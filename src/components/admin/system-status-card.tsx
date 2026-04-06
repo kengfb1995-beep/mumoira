@@ -9,7 +9,7 @@ export function SystemStatusCard() {
   async function checkHealth() {
     setLoading(true);
     try {
-      const res = await fetch("/api/health");
+      const res = await fetch("/api/health", { cache: "no-store" });
       const data = (await res.json()) as { ok?: boolean; db?: string; timestamp?: string };
       if (res.ok && data.ok) {
         setStatus(`Hệ thống hoạt động tốt · DB: ${data.db} · ${data.timestamp}`);

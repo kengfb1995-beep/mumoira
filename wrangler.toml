@@ -17,9 +17,13 @@ crons = ["*/15 * * * *"]
 
 [vars]
 APP_BASE_URL = "https://mumoira.id.vn"
+SETTINGS_ENCRYPTION_KEY = "d31eed1170cc42822004384a02f58c53391721b0e247340502241f7a8b9fc5a3"
+TURSO_DATABASE_URL = "libsql://mumoira-kengpham.aws-ap-northeast-1.turso.io"
+TURSO_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzUyNzkwNjEsImlkIjoiMDE5ZDU2YWItM2UwMS03N2YyLThjNmMtZTg4MDM2OTI1NzhjIiwicmlkIjoiOWRmMDA0ZjYtMzFkZS00MDEzLWJmODctNTNkODI3NzJkNjljIn0.CnD4PM9C-q3Q37f7UFGlisCfumuBloM7RUrk-Tcun1cCltoom_cOBaKfFymcltOZXrKfDnoZAnwBEkpL6xsbBg"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "mumoiradb"
 database_id = "081ee227-67ba-47c9-96f9-e7c85e1eb687"
 migrations_dir = "drizzle"
+

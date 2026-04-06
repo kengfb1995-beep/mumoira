@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { eq } from "drizzle-orm";
 import { servers } from "@/db/schema";
 import { getDb } from "@/lib/db";
+import { parseServerIdFromSlug } from "@/lib/seo";
 
 export const size = {
   width: 1200,
@@ -16,16 +17,24 @@ type Props = {
 
 export default async function OgImage({ params }: Props) {
   const resolved = await params;
-  const serverId = Number(resolved.id);
+  const serverId = parseServerIdFromSlug(resolved.id);
 
-  const db = getDb();
-  const row = await db
-    .select({ name: servers.name, version: servers.version, exp: servers.exp, drop: servers.drop })
-    .from(servers)
-    .where(eq(servers.id, serverId))
-    .limit(1);
+  let server: {
+    name: string;
+    version: string;
+    exp: string;
+    drop: string;
+  } | undefined;
 
-  const server = row[0];
+  if (serverId) {
+    const db = getDb();
+    const row = await db
+      .select({ name: servers.name, version: servers.version, exp: servers.exp, drop: servers.drop })
+      .from(servers)
+      .where(eq(servers.id, serverId))
+      .limit(1);
+    server = row[0];
+  }
 
   return new ImageResponse(
     (

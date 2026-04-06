@@ -9,15 +9,27 @@ import { getSession } from "@/lib/session";
 
 const schema = z.object({
   id: z.number().int().positive(),
-  status: z.enum(["pending", "active", "archived"]),
+  status: z.enum(["pending", "active", "archived", "rejected"]),
   vipPackageType: z.enum(["none", "vip_silver", "vip_gold"]).optional(),
 });
 
 export async function PATCH(req: Request) {
   try {
-    const session = await getSession();
-    const ip = getClientIp(req);
+    let session;
+    try {
+      session = await getSession();
+    } catch {
+      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+    }
+    if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
+      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
+    }
 
+    if (!assertCsrf(req)) {
+      return NextResponse.json({ message: "CSRF token không hợp lệ" }, { status: 403 });
+    }
+
+    const ip = getClientIp(req);
     const guard = enforceRateLimit({
       key: `admin:server-status:${ip}`,
       limit: 30,
@@ -26,14 +38,6 @@ export async function PATCH(req: Request) {
 
     if (!guard.allowed) {
       return rateLimitResponse(guard.retryAfterMs);
-    }
-
-    if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
-      return NextResponse.json({ message: "Không có quyền truy cập" }, { status: 403 });
-    }
-
-    if (!assertCsrf(req)) {
-      return NextResponse.json({ message: "CSRF token không hợp lệ" }, { status: 403 });
     }
 
     const payload = schema.parse(await req.json());

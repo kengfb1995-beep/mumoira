@@ -1,0 +1,41 @@
+# Deploy mặc định (top-level): dùng `npm run cf:deploy` hoặc `wrangler deploy --env=""`.
+# Môi trường `remote_d1` chỉ cho `wrangler dev -e remote_d1` (D1 remote khi dev local).
+name = "mumoira"
+main = ".open-next/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+workers_dev = false
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "mumoira"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[vars]
+APP_BASE_URL = "https://mumoira.id.vn"
+SETTINGS_ENCRYPTION_KEY = "9bfe8ee46044f5590f378fbc002c7c643061ba9d44bfa7013af76ad06e3f681b"
+
+# Mặc định: `wrangler dev` / `cf:preview` dùng D1 LOCAL (SQLite trong .wrangler/state),
+# không đồng bộ với D1 trên Cloudflare — tài khoản production sẽ không đăng nhập được ở local.
+# Để preview dùng đúng D1 trên Cloudflare: `npm run cf:preview:remote-d1` (cần `wrangler login`).
+# Cảnh báo: mọi ghi/xóa trên local sẽ tác động dữ liệu thật trên D1 đã bind.
+[[d1_databases]]
+binding = "DB"
+database_name = "mumoiradb"
+database_id = "081ee227-67ba-47c9-96f9-e7c85e1eb687"
+migrations_dir = "drizzle"
+
+# Kế thừa toàn bộ cấu hình trên; chỉ đổi binding D1 sang remote (theo Cloudflare remote bindings).
+[env.remote_d1]
+[[env.remote_d1.d1_databases]]
+binding = "DB"
+database_name = "mumoiradb"
+database_id = "081ee227-67ba-47c9-96f9-e7c85e1eb687"
+migrations_dir = "drizzle"
+remote = true

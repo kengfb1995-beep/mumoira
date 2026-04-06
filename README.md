@@ -1,70 +1,72 @@
 # MuMoiRa
 
-MuMoiRa now deploys as a **single Cloudflare Worker** named `mumoira` using OpenNext (Next.js on Workers), with cron running in the same worker.
+MuMoiRa là website danh bạ máy chủ MU Private, deploy trên **Netlify** với database **Turso** (libSQL).
 
 ## Architecture
 
-- **Web app**: Next.js (`src/app/**`), served by OpenNext worker output
-- **Cron task**: scheduled trigger every 15 minutes, implemented in `src/cron.ts`
-- **Worker entrypoint**: `src/index.ts` (re-exports OpenNext default fetch + scheduled handler)
+- **Web app**: Next.js 15 (App Router), hosted on Netlify
+- **Database**: Turso (libSQL — compatible SQLite)
+- **ORM**: Drizzle ORM
+- **Cron**: Netlify Scheduled Functions (`/api/maintenance/expire-banners`)
 
 ## Local development
 
-Install dependencies:
-
 ```bash
+# 1. Cài dependencies (đã bao gồm @libsql/client)
 npm install
-```
 
-Run normal Next.js dev server:
+# 2. Copy biến môi trường
+cp .env.example .env.local
+# Chỉnh sửa .env.local với credentials thật
 
-```bash
+# 3. Chạy dev server
 npm run dev
 ```
 
-Preview Worker production build locally:
+## Deploy to Netlify
+
+### Cách 1: Netlify CLI
 
 ```bash
-npm run cf:preview
+npm install -g netlify-cli
+netlify login
+netlify deploy --prod
 ```
 
-## Deploy to Cloudflare Workers (no Pages required)
+### Cách 2: GitHub Integration
 
-Build and deploy in one command:
+1. Push code lên GitHub
+2. Kết nối repo với Netlify (Site settings → Build & deploy → Continuous deployment)
+3. Thêm environment variables trong Netlify Dashboard:
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+   - `SESSION_SECRET`
+   - `SETTINGS_ENCRYPTION_KEY`
+   - `PAYO_CLIENT_ID`, `PAYO_API_KEY`, `PAYO_CHECKSUM_KEY`, `PAYOS_WEBHOOK_SECRET`
+   - `GROQ_API_KEY` (optional)
+   - `MAINTENANCE_CRON_SECRET`
+
+## Database migrations
 
 ```bash
-npm run cf:deploy
+# Generate migration (sau khi thay đổi schema)
+npm run db:generate
+
+# Apply migration lên Turso
+npm run db:migrate
+
+# Studio (dev only)
+npm run db:studio
 ```
 
-This command builds OpenNext output (`.open-next/**`) and deploys worker `mumoira`.
+## Required environment variables
 
-## Wrangler config summary
-
-`wrangler.toml` is configured for OpenNext:
-
-- `name = "mumoira"`
-- `main = ".open-next/worker.js"`
-- assets binding from `.open-next/assets`
-- service self-reference for cache support
-- cron trigger: `*/15 * * * *`
-
-## Required env/secrets
-
-Set these in Cloudflare Worker settings (or Wrangler secrets):
-
-- `APP_BASE_URL` = `https://mumoira.id.vn`
-- `MAINTENANCE_CRON_SECRET` (required secret)
-- `CRON_ALERT_WEBHOOK_URL` (optional secret)
-
-CLI alternative:
-
-```bash
-npx wrangler secret put MAINTENANCE_CRON_SECRET
-npx wrangler secret put CRON_ALERT_WEBHOOK_URL
-```
-
-## Domain routing
-
-Use custom domain `mumoira.id.vn` directly on worker `mumoira`.
-
-Do not point the domain to a separate text-only cron worker anymore.
+| Variable | Description |
+|---|---|
+| `TURSO_DATABASE_URL` | Database URL từ Turso console (dạng `libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Auth token từ Turso console |
+| `SESSION_SECRET` | Random 64-char string cho session cookies |
+| `SETTINGS_ENCRYPTION_KEY` | Random 64-char string cho mã hóa settings |
+| `PAYO_*` | PayOS credentials (từ payos.vn) |
+| `MAINTENANCE_CRON_SECRET` | Bearer token bảo vệ cron endpoint |
+| `GROQ_API_KEY` | Optional — Groq API cho AI rewrite |

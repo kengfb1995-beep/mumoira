@@ -47,8 +47,13 @@ async function loadSnapshot() {
 }
 
 export async function GET() {
-  const session = await getSession();
-  if (!session || session.role !== "admin") {
+  let session;
+  try {
+    session = await getSession();
+  } catch {
+    return new Response("Forbidden", { status: 403 });
+  }
+  if (!session || (session.role !== "admin" && session.role !== "super_admin")) {
     return new Response("Forbidden", { status: 403 });
   }
 

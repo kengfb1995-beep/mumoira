@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 44" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+  </defs>
+  <text x="0" y="30" fill="url(#g)" font-family="system-ui, Segoe UI, sans-serif" font-size="24" font-weight="800" letter-spacing="0.06em">MUMOIRA</text>
+  <text x="0" y="41" fill="#64748b" font-family="ui-monospace, monospace" font-size="9.5" font-weight="600" letter-spacing="0.22em">.ID.VN</text>
+</svg>

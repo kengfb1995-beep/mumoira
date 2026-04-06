@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { eq } from "drizzle-orm";
 import { posts } from "@/db/schema";
 import { getDb } from "@/lib/db";
+import { parsePostIdFromSlug } from "@/lib/seo";
 
 export const size = {
   width: 1200,
@@ -16,16 +17,18 @@ type Props = {
 
 export default async function OgImage({ params }: Props) {
   const resolved = await params;
-  const postId = Number(resolved.id);
+  const postId = parsePostIdFromSlug(resolved.id);
 
-  const db = getDb();
-  const row = await db
-    .select({ title: posts.title })
-    .from(posts)
-    .where(eq(posts.id, postId))
-    .limit(1);
-
-  const title = row[0]?.title ?? "Tin tức Mu Mới Ra";
+  let title = "Tin tức Mu Mới Ra";
+  if (postId) {
+    const db = getDb();
+    const row = await db
+      .select({ title: posts.title })
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .limit(1);
+    if (row[0]?.title) title = row[0].title;
+  }
 
   return new ImageResponse(
     (

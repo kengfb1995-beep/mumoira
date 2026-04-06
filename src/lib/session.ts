@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 const SESSION_COOKIE_NAME = "mmr_session";
@@ -9,8 +9,25 @@ type SessionPayload = {
   email: string;
 };
 
+/** Khi chưa đặt SESSION_SECRET, dùng khóa riêng (SHA-256) từ SETTINGS_ENCRYPTION_KEY để tránh Worker production 500. Nên đặt SESSION_SECRET riêng khi có thể. */
+function deriveSessionSecretFromEncryptionKey(): string | null {
+  const k = process.env.SETTINGS_ENCRYPTION_KEY?.trim();
+  if (!k) return null;
+  return createHash("sha256").update(`mmr_session_v1|${k}`, "utf8").digest("hex");
+}
+
 function getSessionSecret() {
-  return process.env.SESSION_SECRET ?? "dev-session-secret-change-me";
+  const explicit = process.env.SESSION_SECRET?.trim();
+  if (explicit) return explicit;
+
+  if (process.env.NODE_ENV === "production") {
+    const derived = deriveSessionSecretFromEncryptionKey();
+    if (derived) return derived;
+    throw new Error(
+      "Thiếu SESSION_SECRET và SETTINGS_ENCRYPTION_KEY. Hãy đặt ít nhất một trong hai (.env.local hoặc Netlify environment variables).",
+    );
+  }
+  return "dev-session-secret-change-me";
 }
 
 function sign(payload: string) {
@@ -54,8 +71,19 @@ export async function clearSession() {
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const store = await cookies();
-  const token = store.get(SESSION_COOKIE_NAME)?.value;
-  if (!token) return null;
-  return decode(token);
+  try {
+    const store = await cookies();
+    const token = store.get(SESSION_COOKIE_NAME)?.value;
+    if (!token) return null;
+    return decode(token);
+  } catch {
+    return null;
+  }
+}
+
+export async function getAdminSession(): Promise<SessionPayload | null> {
+  const session = await getSession();
+  if (!session) return null;
+  if (session.role !== "admin" && session.role !== "super_admin") return null;
+  return session;
 }

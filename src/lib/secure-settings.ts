@@ -9,12 +9,17 @@ type SecureEnvelope = {
   ciphertext: string;
 };
 
+let cachedKey: Buffer | null = null;
+
 function getEncryptionKey() {
+  if (cachedKey) return cachedKey;
   const secret = process.env.SETTINGS_ENCRYPTION_KEY;
   if (!secret) {
     throw new Error("Thiếu SETTINGS_ENCRYPTION_KEY");
   }
-  return scryptSync(secret, "mu-moi-ra-settings-salt", 32);
+  // Tối ưu N=1024 để chạy nhanh hơn trong Cloudflare Worker (Free tier 10ms)
+  cachedKey = scryptSync(secret, "mu-moi-ra-settings-salt", 32, { N: 1024 });
+  return cachedKey;
 }
 
 function encrypt(plainText: string) {
@@ -35,23 +40,28 @@ function encrypt(plainText: string) {
 }
 
 function decrypt(cipherText: string) {
-  if (!cipherText.startsWith("enc:v1:")) {
-    return cipherText;
+  try {
+    if (!cipherText.startsWith("enc:v1:")) {
+      return cipherText;
+    }
+
+    const raw = cipherText.slice("enc:v1:".length);
+    const parsed = JSON.parse(Buffer.from(raw, "base64").toString("utf8")) as SecureEnvelope;
+
+    const key = getEncryptionKey();
+    const iv = Buffer.from(parsed.iv, "base64");
+    const tag = Buffer.from(parsed.tag, "base64");
+    const encrypted = Buffer.from(parsed.ciphertext, "base64");
+
+    const decipher = createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    return decrypted.toString("utf8");
+  } catch (e) {
+    console.error("Antigravity: Decryption failed. Possible key mismatch or param change.", e);
+    return null;
   }
-
-  const raw = cipherText.slice("enc:v1:".length);
-  const parsed = JSON.parse(Buffer.from(raw, "base64").toString("utf8")) as SecureEnvelope;
-
-  const key = getEncryptionKey();
-  const iv = Buffer.from(parsed.iv, "base64");
-  const tag = Buffer.from(parsed.tag, "base64");
-  const encrypted = Buffer.from(parsed.ciphertext, "base64");
-
-  const decipher = createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(tag);
-
-  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-  return decrypted.toString("utf8");
 }
 
 export async function upsertSecureSetting(key: string, value: string) {
@@ -74,4 +84,20 @@ export async function getSecureSetting(key: string) {
   if (!value) return null;
 
   return decrypt(value);
+}
+
+import { inArray } from "drizzle-orm";
+
+export async function getSecureSettings(keys: string[]) {
+  const db = getDb();
+  const rows = await db.select({ key: settings.key, value: settings.value }).from(settings).where(inArray(settings.key, keys));
+  
+  const results: Record<string, string | null> = {};
+  for (const key of keys) results[key] = null;
+  
+  for (const row of rows) {
+    results[row.key] = decrypt(row.value);
+  }
+  
+  return results;
 }

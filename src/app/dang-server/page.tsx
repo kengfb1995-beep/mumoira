@@ -1,15 +1,18 @@
-import { requireUser } from "@/lib/auth";
+import { Crown } from "lucide-react";
+import { ContentPageHeader } from "@/components/layout/content-page-header";
 import { PostServerForm } from "@/components/servers/post-server-form";
+import { requireUser } from "@/lib/auth";
 
 export default async function PostServerPage() {
   await requireUser();
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-amber-100">Đăng server MU mới</h1>
-      <p className="text-sm text-zinc-300">
-        Mỗi lượt đăng server sẽ trừ <span className="font-semibold text-amber-200">5.000đ</span> từ số dư tài khoản.
-      </p>
+    <div className="space-y-3 sm:space-y-4">
+      <ContentPageHeader
+        icon={Crown}
+        title="Đăng server MU mới"
+        description="Hoàn thiện thông tin để hiển thị trên danh bạ. Mỗi lượt đăng trừ 5.000đ từ số dư."
+      />
       <PostServerForm />
     </div>
   );

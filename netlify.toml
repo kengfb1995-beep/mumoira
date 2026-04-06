@@ -1,0 +1,26 @@
+[build]
+  command = "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Nếu dùng Turso embedded replica (local SQLite sync), bỏ dòng này
+  # và dùng TURSO_DATABASE_URL dạng file:./local.db
+
+# Chạy migrations khi deploy (tùy chọn — chạy thủ công nếu muốn)
+# [[plugins]]
+#   package = "@netlify/plugin-drizzle"
+
+[[redirects]]
+  from = "/api/cron/*"
+  to = "/api/cron/:splat"
+  status = 200
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "production"

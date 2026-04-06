@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       description: txDescription,
     });
 
-    const payos = getPayOSClient();
+    const payos = await getPayOSClient();
     const checkout = await payos.paymentRequests.create({
       orderCode,
       amount,
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       checkoutUrl: checkout.checkoutUrl,
-      qrCode: checkout.qrCode,
+      qrCode: checkout.qrCode ?? (checkout as { qrCodeText?: string }).qrCodeText ?? null,
       orderCode,
     });
   } catch (error) {
@@ -49,6 +49,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Dữ liệu không hợp lệ", issues: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json({ message: "Không thể tạo link thanh toán" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Không rõ nguyên nhân";
+    return NextResponse.json(
+      {
+        message: "Không thể tạo link thanh toán",
+        detail: process.env.NODE_ENV !== "production" ? errorMessage : undefined,
+      },
+      { status: 500 },
+    );
   }
 }

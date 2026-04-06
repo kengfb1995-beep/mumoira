@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ message: "Bạn cần đăng nhập" }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = getDb() as any;
   const row = await db
     .select({ balance: users.balance })
     .from(users)
