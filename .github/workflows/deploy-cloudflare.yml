@@ -27,7 +27,7 @@ jobs:
         run: npx opennextjs-cloudflare build
 
       - name: Restore libSQL workerd entrypoints
-        run: node scripts/fix-open-next-libsql.cjs
+        run: npm run cf:patch
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy

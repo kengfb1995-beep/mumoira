@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260403.1",
-    "@opennextjs/cloudflare": "^1.18.0",
+    "@opennextjs/cloudflare": "^1.18.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
