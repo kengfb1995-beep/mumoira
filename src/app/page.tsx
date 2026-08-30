@@ -459,31 +459,46 @@ function ListFilterBar({
 
   const alphaActive = filter === "alpha_today";
   const openActive = filter === "open_today";
+  const allActive = !filter;
 
   return (
-    <div className="mb-1.5 flex flex-col gap-1.5 rounded-md border border-emerald-800/30 bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-emerald-950/40 p-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+    <div className="mb-2 flex flex-col gap-2 rounded-md border border-[#22354a] bg-gradient-to-r from-[#121c27] via-[#162230] to-[#121c27] p-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-sm font-bold text-zinc-100 sm:text-base">Lọc theo:</span>
+        <span className="text-xs font-bold text-zinc-400 sm:text-sm">Bộ lọc:</span>
         <a
-          href={buildHomeHref(1, { filter: "alpha_today", q })}
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:py-2 sm:text-sm ${
-            alphaActive ? "bg-emerald-600 text-white ring-2 ring-emerald-400/50" : "bg-emerald-700/70 text-emerald-50 hover:bg-emerald-600"
+          href={buildHomeHref(1, { filter: null, q })}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+            allActive
+              ? "bg-[#25394f] text-white shadow-sm border border-sky-400/40"
+              : "bg-[#16222f] text-zinc-300 border border-zinc-700/60 hover:border-zinc-500 hover:text-white"
           }`}
         >
-          Alpha Test hôm nay
+          Tất cả
+        </a>
+        <a
+          href={buildHomeHref(1, { filter: "alpha_today", q })}
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+            alphaActive
+              ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/30 border border-emerald-400/60"
+              : "bg-emerald-950/50 text-emerald-300 border border-emerald-700/40 hover:bg-emerald-900/60 hover:text-white"
+          }`}
+        >
+          🟢 Alpha Test hôm nay
         </a>
         <a
           href={buildHomeHref(1, { filter: "open_today", q })}
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors sm:px-4 sm:py-2 sm:text-sm ${
-            openActive ? "bg-red-600 text-white ring-2 ring-red-400/50" : "bg-red-700/80 text-red-50 hover:bg-red-600"
+          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+            openActive
+              ? "bg-red-600 text-white shadow-sm shadow-red-500/30 border border-red-400/60"
+              : "bg-red-950/50 text-red-300 border border-red-700/40 hover:bg-red-900/60 hover:text-white"
           }`}
         >
-          Open beta hôm nay
+          🔴 Open Beta hôm nay
         </a>
         {(filter === "alpha_today" || filter === "open_today") && (
           <a
             href={buildHomeHref(1, { filter: null, q })}
-            className="text-sm font-medium text-zinc-300 underline hover:text-zinc-100"
+            className="text-xs font-semibold text-zinc-400 underline hover:text-zinc-200"
           >
             Xóa lọc
           </a>
@@ -496,15 +511,15 @@ function ListFilterBar({
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Tìm kiếm MU mới ra..."
-          className="min-w-0 flex-1 rounded-md border border-white/20 bg-black/50 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-400 sm:px-4 sm:text-base"
+          placeholder="Tìm kiếm máy chủ MU..."
+          className="min-w-0 flex-1 rounded-md border border-[#263a4e] bg-black/60 px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-red-500 focus:outline-none sm:text-sm"
         />
         <button
           type="submit"
-          className="flex shrink-0 items-center justify-center rounded-md border border-sky-600/60 bg-sky-700/80 px-3 py-2 text-sky-50 hover:bg-sky-600 sm:px-4"
+          className="flex shrink-0 items-center justify-center rounded-md border border-sky-600/70 bg-gradient-to-r from-sky-700 to-sky-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm shadow-sky-600/30 transition hover:brightness-110 sm:px-4"
           aria-label="Tìm kiếm"
         >
-          <Search className="h-5 w-5" />
+          <Search className="h-4 w-4" />
         </button>
       </form>
     </div>
@@ -565,31 +580,68 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const hasAnyNonGold = silverCount > 0 || freePoolCount > 0;
 
   return (
-    <div className="min-w-0 px-1.5 py-1 sm:px-2 sm:py-1.5">
-      {/* Khoảng cách dọc giữa banner ↔ tiêu đề ↔ VIP ↔ danh sách */}
-      <div className="flex w-full min-w-0 flex-col gap-2 overflow-x-auto sm:gap-2.5">
+    <div className="min-w-0 px-1.5 py-1.5 sm:px-2 sm:py-2">
+      {/* Bố cục: Banner ↔ Hero Title ↔ VIP ↔ Danh Sách */}
+      <div className="flex w-full min-w-0 flex-col gap-2.5 overflow-x-auto sm:gap-3">
         <div className="flex w-full min-w-0 flex-col items-stretch gap-1">
           <CenterTopBanner />
           <CenterMidBanners />
         </div>
 
-        <div className="min-w-0">
-          <h1 className="text-base font-extrabold leading-tight text-amber-100 sm:text-lg">Mu Mới Ra Hôm Nay</h1>
-          <p className="mt-0.5 text-xs leading-snug text-zinc-500 sm:text-sm">
-            {allServers.length} server đang hoạt động
-            {vipGoldCount > 0 ? ` · ${vipGoldCount} VIP Vàng` : ""}
-            {silverCount > 0 ? ` · ${silverCount} VIP Bạc` : ""}
-            {freePoolCount > 0 ? ` · ${freePoolCount} đăng miễn phí` : ""}
-          </p>
+        {/* Hero Title & Live Badges */}
+        <div className="relative overflow-hidden rounded-md border border-amber-500/30 bg-gradient-to-br from-[#1b140d]/90 via-[#121922]/90 to-[#0c1219]/90 p-2.5 sm:p-3 shadow-md shadow-black/40">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400/90 sm:text-xs">
+                  Cổng Thông Tin Game MU Online #1 Việt Nam
+                </span>
+              </div>
+              <h1 className="mt-0.5 text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 sm:text-lg">
+                Mu Mới Ra Hôm Nay - Danh Bạ Máy Chủ MU Online Mới Ra
+              </h1>
+              <p className="mt-0.5 text-xs leading-relaxed text-zinc-400 sm:text-[13px]">
+                Cập nhật liên tục danh sách máy chủ MU Online mới ra hôm nay: Alpha Test, Open Beta, Season 1 - Season 21 uy tín.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                {allServers.length} Server hoạt động
+              </span>
+              {vipGoldCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
+                  👑 {vipGoldCount} VIP Vàng
+                </span>
+              )}
+              {silverCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-400/40 bg-slate-800/60 px-2.5 py-0.5 text-[11px] font-bold text-slate-300">
+                  🛡️ {silverCount} VIP Bạc
+                </span>
+              )}
+              {freePoolCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-950/50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-300">
+                  🎮 {freePoolCount} Đăng miễn phí
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
+        {/* Danh sách Mu VIP Vàng */}
         {vipGoldServers.length > 0 ? (
-          <section className="w-full overflow-hidden rounded-sm border border-amber-400/55 bg-[#fff8dc] shadow-sm">
-            <div className="flex items-center gap-1.5 border-b border-amber-300/90 bg-[#fff3c4] px-2 py-0.5">
-              <span className="text-red-600" aria-hidden>
-                ◆
+          <section className="w-full overflow-hidden rounded-md border border-amber-400/70 bg-[#fffdf0] shadow-md shadow-amber-500/10">
+            <div className="flex items-center justify-between border-b border-amber-300/90 bg-gradient-to-r from-[#ffeaa7] via-[#fff3c4] to-[#ffeaa7] px-2.5 py-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-red-600 text-sm" aria-hidden>◆</span>
+                <h2 className="text-sm font-extrabold uppercase tracking-wide text-zinc-900 sm:text-[15px]">
+                  Danh Sách Mu VIP Vàng
+                </h2>
+              </div>
+              <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-900 border border-amber-600/30">
+                HOT PREMIUM
               </span>
-              <h2 className="text-sm font-bold text-zinc-900 sm:text-[15px]">Danh sách Mu VIP</h2>
             </div>
             <div className="space-y-1.5 p-1.5 sm:space-y-2 sm:p-2">
               {vipGoldServers.map((server, idx) => (
@@ -599,77 +651,83 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
           </section>
         ) : null}
 
-      <section className="w-full">
-        {hasAnyNonGold ? (
-          <>
-            <div className="mb-0 flex items-center gap-2 border-b border-sky-800/40 bg-amber-950/15 px-2 py-0.5">
-              <span className="text-red-500" aria-hidden>
-                ◆
-              </span>
-              <h2 className="text-sm font-bold leading-tight text-amber-100 sm:text-[15px]">Danh sách Mu mới ra miễn phí hôm nay</h2>
-            </div>
-
-            {vipSilverServers.length > 0 ? (
-              <div className="mb-0 mt-1.5 space-y-1.5 sm:mt-2 sm:space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wide text-slate-300 sm:text-sm">VIP Bạc</h3>
-                {vipSilverServers.map((server, idx) => (
-                  <ServerRow
-                    key={server.id}
-                    server={server}
-                    index={vipGoldServers.length + idx + 1}
-                    variant="silver"
-                    now={now}
-                  />
-                ))}
+        {/* Danh sách Miễn Phí & VIP Bạc */}
+        <section className="w-full">
+          {hasAnyNonGold ? (
+            <>
+              <div className="mb-1 flex items-center justify-between border-b border-sky-800/40 bg-gradient-to-r from-sky-950/40 via-sky-900/30 to-sky-950/40 px-2.5 py-1 rounded-t-md">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-red-500 text-sm" aria-hidden>◆</span>
+                  <h2 className="text-sm font-bold uppercase tracking-wide text-amber-100 sm:text-[15px]">
+                    Danh Sách Mu Mới Ra Miễn Phí Hôm Nay
+                  </h2>
+                </div>
+                <span className="text-[11px] font-semibold text-zinc-400">
+                  Cập nhật liên tục
+                </span>
               </div>
-            ) : null}
 
-            {freePoolCount > 0 ? (
-              <>
-                {vipSilverServers.length > 0 ? (
-                  <h3 className="mb-0 mt-2 text-xs font-bold uppercase tracking-wide text-zinc-400 sm:mt-2.5 sm:text-sm">
-                    Đăng miễn phí
-                  </h3>
-                ) : null}
-                <ListFilterBar filter={filter} q={qRaw} hasServers={freePoolCount > 0} />
+              {vipSilverServers.length > 0 ? (
+                <div className="mb-2 mt-1.5 space-y-1.5 sm:mt-2 sm:space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-300 sm:text-sm">VIP Bạc</h3>
+                  {vipSilverServers.map((server, idx) => (
+                    <ServerRow
+                      key={server.id}
+                      server={server}
+                      index={vipGoldServers.length + idx + 1}
+                      variant="silver"
+                      now={now}
+                    />
+                  ))}
+                </div>
+              ) : null}
 
-                {regularServers.length > 0 ? (
-                  <>
-                    <p className="mb-0.5 text-xs text-zinc-400 sm:text-sm">
-                      Hiển thị {paginatedRegular.length} / {regularServers.length} server
-                      {filter || qRaw ? " (đã lọc)" : ""}
-                      {totalPages > 1 ? ` · Trang ${safePage}/${totalPages}` : ""}
-                    </p>
-                    <div className="space-y-1.5 sm:space-y-2">
-                      {paginatedRegular.map((server, idx) => (
-                        <ServerRow
-                          key={server.id}
-                          server={server}
-                          index={vipGoldServers.length + vipSilverServers.length + offset + idx + 1}
-                          variant="regular"
-                          now={now}
-                        />
-                      ))}
+              {freePoolCount > 0 ? (
+                <>
+                  {vipSilverServers.length > 0 ? (
+                    <h3 className="mb-1 mt-2 text-xs font-bold uppercase tracking-wide text-zinc-400 sm:mt-2.5 sm:text-sm">
+                      Đăng miễn phí
+                    </h3>
+                  ) : null}
+                  <ListFilterBar filter={filter} q={qRaw} hasServers={freePoolCount > 0} />
+
+                  {regularServers.length > 0 ? (
+                    <>
+                      <p className="mb-1 text-xs text-zinc-400 sm:text-sm">
+                        Hiển thị {paginatedRegular.length} / {regularServers.length} server
+                        {filter || qRaw ? " (đã lọc)" : ""}
+                        {totalPages > 1 ? ` · Trang ${safePage}/${totalPages}` : ""}
+                      </p>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {paginatedRegular.map((server, idx) => (
+                          <ServerRow
+                            key={server.id}
+                            server={server}
+                            index={vipGoldServers.length + vipSilverServers.length + offset + idx + 1}
+                            variant="regular"
+                            now={now}
+                          />
+                        ))}
+                      </div>
+                      <PaginationBar currentPage={safePage} totalPages={totalPages} filter={filter} q={qRaw} />
+                    </>
+                  ) : (
+                    <div className="rounded-lg border border-[#1e1010] bg-[#0a0505] p-5 text-center sm:p-6">
+                      <p className="text-sm text-zinc-500">Không có server nào khớp bộ lọc hoặc từ khóa.</p>
+                      <a href={buildHomeHref(1, { filter: null, q: null })} className="mt-2 inline-block text-sm text-sky-400 underline">
+                        Xem toàn bộ danh sách
+                      </a>
                     </div>
-                    <PaginationBar currentPage={safePage} totalPages={totalPages} filter={filter} q={qRaw} />
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-[#1e1010] bg-[#0a0505] p-5 text-center sm:p-6">
-                    <p className="text-sm text-zinc-500">Không có server nào khớp bộ lọc hoặc từ khóa.</p>
-                    <a href={buildHomeHref(1, { filter: null, q: null })} className="mt-2 inline-block text-sm text-sky-400 underline">
-                      Xem toàn bộ danh sách
-                    </a>
-                  </div>
-                )}
-              </>
-            ) : null}
-          </>
-        ) : (
-          <div className="rounded-lg border border-[#1e1010] bg-[#0a0505] p-6 text-center sm:p-8">
-            <p className="text-sm text-zinc-600">Chưa có server VIP Bạc hoặc đăng miễn phí nào được duyệt.</p>
-          </div>
-        )}
-      </section>
+                  )}
+                </>
+              ) : null}
+            </>
+          ) : (
+            <div className="rounded-lg border border-[#1e1010] bg-[#0a0505] p-6 text-center sm:p-8">
+              <p className="text-sm text-zinc-600">Chưa có server VIP Bạc hoặc đăng miễn phí nào được duyệt.</p>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
