@@ -18,6 +18,13 @@ import {
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = buildPageMetadata({
+  title: "Mu Mới Ra - Danh Bạ Game MU Online Mới Ra Hôm Nay & Server MU Private Hay Nhất",
+  description: "Cập nhật danh sách máy chủ MU Online mới ra hôm nay, MU Mới Ra tháng này, tổng hợp server MU Private Season 2, Season 6, Season 19 Alpha Test & Open Beta uy tín.",
+  path: "/",
+  keywords: "mu moi ra, mu moi ra hom nay, mu private, mu open beta, mu alpha test, danh ba mu, mu hay nhat, mu online",
+});
+
 type SearchParams = Promise<{ page?: string; filter?: string; q?: string }>;
 
 // ── Pagination helpers ─────────────────────────────────────────────────────────

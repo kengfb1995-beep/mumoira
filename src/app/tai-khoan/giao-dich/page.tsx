@@ -16,7 +16,7 @@ export default async function AccountTransactionsPage() {
       <div className="space-y-2">
         {recentTransactions.length === 0 ? (
           <p className="rounded-md border border-amber-500/20 bg-black/30 p-3 text-xs text-zinc-400 sm:text-sm">
-            Chưa có giao dịch hoàn tất. Giao dịch nạp tiền chỉ xuất hiện sau khi thanh toán PayOS thành công.
+            Chưa có giao dịch hoàn tất. Giao dịch nạp tiền sẽ xuất hiện sau khi được Quản trị viên duyệt thành công.
           </p>
         ) : null}
         {recentTransactions.map((tx) => (

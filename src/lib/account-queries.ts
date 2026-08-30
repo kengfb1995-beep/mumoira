@@ -12,7 +12,7 @@ export async function getAccountProfile(userId: number) {
   return rows[0] ?? null;
 }
 
-/** Chỉ giao dịch đã hoàn tất (nạp tiền sau webhook PayOS, mua dịch vụ / phí server ghi ngay success). Pending không hiển thị trong lịch sử người dùng. */
+/** Chỉ giao dịch đã hoàn tất (nạp tiền sau khi Admin duyệt, mua dịch vụ / phí server ghi ngay success). Pending không hiển thị trong lịch sử người dùng. */
 export async function getAccountTransactions(userId: number, limit = 30) {
   const db = getDb();
   return db

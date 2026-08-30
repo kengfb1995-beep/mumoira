@@ -5,12 +5,12 @@ import { getSecureSettings } from "@/lib/secure-settings";
 const defaultSiteUrl = "https://mumoira.id.vn";
 
 function resolvePublicSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  const raw = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_BASE_URL)?.trim();
   if (!raw) return defaultSiteUrl;
   try {
     const u = new URL(raw);
     if (u.protocol !== "http:" && u.protocol !== "https:") return defaultSiteUrl;
-    return u.origin;
+    return u.origin.replace(/\/+$/, "");
   } catch {
     return defaultSiteUrl;
   }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   CalendarDays,
   Clock,
@@ -16,12 +16,15 @@ import {
 } from "lucide-react";
 import { servers } from "@/db/schema";
 import { getDb } from "@/lib/db";
-import { buildPageMetadata, buildServerJsonLd, buildServerPath, parseServerIdFromSlug } from "@/lib/seo";
+import { buildPageMetadata, buildServerJsonLd, buildServerPath, parseServerIdFromSlug, stripHtml } from "@/lib/seo";
 import { serverIntroToSafeHtml } from "@/lib/server-content-html";
 import { formatDateTimeFullVietnam, getCalendarDayMsInVietnam } from "@/lib/vn-datetime";
 import { resolveServerSlug } from "@/lib/server-slug";
 import { getSession } from "@/lib/session";
 import { ServerDateEditorList } from "@/components/servers/server-date-editor-list";
+
+export const dynamicParams = true;
+export const revalidate = 60;
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -30,35 +33,47 @@ type Props = {
 // ── Data fetching ─────────────────────────────────────────────────────────────
 
 async function getServerById(serverId: number) {
-  const db = getDb();
-  const row = await db
-    .select()
-    .from(servers)
-    .where(eq(servers.id, serverId))
-    .limit(1);
-  return row[0] ?? null;
+  try {
+    const db = getDb();
+    if (!db) return null;
+    const row = await db
+      .select()
+      .from(servers)
+      .where(eq(servers.id, serverId))
+      .limit(1);
+    return row[0] ?? null;
+  } catch (error) {
+    console.error("[ServerPage] getServerById error:", error);
+    return null;
+  }
 }
 
 async function getRelatedServers(currentId: number) {
-  const db = getDb();
-  const rows = await db
-    .select({
-      id: servers.id,
-      name: servers.name,
-      version: servers.version,
-      exp: servers.exp,
-      drop: servers.drop,
-      openBetaDate: servers.openBetaDate,
-      websiteUrl: servers.websiteUrl,
-      bannerUrl: servers.bannerUrl,
-      vipPackageType: servers.vipPackageType,
-      slug: servers.slug,
-    })
-    .from(servers)
-    .where(eq(servers.status, "active"))
-    .orderBy(eq(servers.vipPackageType, "vip_gold"))
-    .limit(8);
-  return rows.filter((s) => s.id !== currentId);
+  try {
+    const db = getDb();
+    if (!db) return [];
+    const rows = await db
+      .select({
+        id: servers.id,
+        name: servers.name,
+        version: servers.version,
+        exp: servers.exp,
+        drop: servers.drop,
+        openBetaDate: servers.openBetaDate,
+        websiteUrl: servers.websiteUrl,
+        bannerUrl: servers.bannerUrl,
+        vipPackageType: servers.vipPackageType,
+        slug: servers.slug,
+      })
+      .from(servers)
+      .where(eq(servers.status, "active"))
+      .orderBy(eq(servers.vipPackageType, "vip_gold"))
+      .limit(8);
+    return (rows ?? []).filter((s) => s.id !== currentId);
+  } catch (error) {
+    console.error("[ServerPage] getRelatedServers error:", error);
+    return [];
+  }
 }
 
 // ── Date formatting ───────────────────────────────────────────────────────────
@@ -98,28 +113,47 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolved = await params;
   const serverId = parseServerIdFromSlug(resolved.id);
   if (!serverId) {
-    return buildPageMetadata({ title: "Server không tồn tại", path: "/" });
+    return {
+      title: "404 - Server không tồn tại | Mu Mới Ra",
+      robots: { index: false, follow: false },
+    };
   }
-  const db = getDb();
-  if (!db) {
-    return buildPageMetadata({ title: "Server không tồn tại", path: "/" });
-  }
+
   const server = await getServerById(serverId);
   if (!server) {
-    return buildPageMetadata({ title: "Server không tồn tại", path: "/" });
+    return {
+      title: "404 - Server không tồn tại | Mu Mới Ra",
+      robots: { index: false, follow: false },
+    };
   }
+
+  const canonicalPath = buildServerPath(server.id, resolveServerSlug(server));
+  const desc = `${server.name} - MU Private phiên bản ${server.version}, EXP ${server.exp}, Drop ${server.drop}. ${stripHtml(server.content ?? "").slice(0, 140)}`.trim();
+
   return buildPageMetadata({
-    title: `${server.name} | Mu Mới Ra`,
-    description: `${server.name} - MU ${server.version}, EXP ${server.exp}, Drop ${server.drop}.`,
-    path: buildServerPath(server.id, resolveServerSlug(server)),
+    title: `${server.name} - MU ${server.version} | Mu Mới Ra`,
+    description: desc,
+    path: canonicalPath,
     image: server.bannerUrl ?? undefined,
+    keywords: `${server.name}, mu ${server.version}, mu moi ra, mu private`,
   });
 }
 
 export async function generateStaticParams() {
-  const db = getDb();
-  const items = await db.select({ id: servers.id }).from(servers).limit(200);
-  return items.map((item) => ({ id: String(item.id) }));
+  try {
+    const db = getDb();
+    if (!db) return [];
+    const items = await db
+      .select({ id: servers.id, name: servers.name, slug: servers.slug })
+      .from(servers)
+      .where(eq(servers.status, "active"))
+      .limit(100);
+    return (items ?? []).map((item) => ({
+      id: `${item.id}-${resolveServerSlug(item)}`,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -129,20 +163,22 @@ export default async function ServerDetailPage({ params }: Props) {
   const serverId = parseServerIdFromSlug(resolved.id);
   if (!serverId) notFound();
 
-  const db = getDb();
-  if (!db) notFound();
-
   const [server, related, session] = await Promise.all([
     getServerById(serverId),
     getRelatedServers(serverId),
-    getSession(),
+    getSession().catch(() => null),
   ]);
+
   if (!server) notFound();
 
-  const isOwner = session != null && session.userId === server.userId;
+  // 301/308 Permanent Redirect sang URL chuẩn nếu người dùng/bot truy cập bằng URL cũ hoặc id trần
+  const canonicalPath = buildServerPath(server.id, resolveServerSlug(server));
+  const expectedSegment = canonicalPath.replace("/server/", "");
+  if (resolved.id !== expectedSegment) {
+    permanentRedirect(canonicalPath);
+  }
 
-  const slug = resolveServerSlug(server);
-  const href = buildServerPath(server.id, slug);
+  const isOwner = session != null && session.userId === server.userId;
   const isVip = server.vipPackageType === "vip_gold";
   const { alphaLabel, alphaColor, openLabel, openColor } = getDateLabel(
     server.openBetaDate,
@@ -189,7 +225,7 @@ export default async function ServerDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Banner + Info — align top so banner height is not stretched; object-contain shows full image */}
+          {/* Banner + Info */}
           <div className="flex flex-col sm:flex-row sm:items-start">
             {/* Banner */}
             <div className="shrink-0 border-b border-[#1e1010] sm:border-b-0 sm:border-r border-[#1e1010]">
@@ -271,7 +307,7 @@ export default async function ServerDetailPage({ params }: Props) {
                     href={server.zaloUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded border border-blue-400/50 bg-blue-400/10 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:bg-blue-400/20"
+                    className="inline-flex items-center gap-1.5 rounded border border-blue-400/50 bg-blue-400/10 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:border-blue-400/20"
                   >
                     <MessageCircle className="h-3.5 w-3.5" aria-hidden />
                     Zalo

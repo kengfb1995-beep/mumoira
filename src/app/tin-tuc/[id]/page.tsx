@@ -1,60 +1,87 @@
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { CalendarDays, Globe2, Tag } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { posts } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { resolvePostSlug } from "@/lib/post-slug";
 import { buildArticleJsonLd, buildPageMetadata, buildPostPath, parsePostIdFromSlug, stripHtml } from "@/lib/seo";
+
+export const dynamicParams = true;
+export const revalidate = 60;
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 async function getPostById(postId: number) {
-  const db = getDb();
-  const row = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      content: posts.content,
-      seoKeywords: posts.seoKeywords,
-      thumbnailUrl: posts.thumbnailUrl,
-      originalUrl: posts.originalUrl,
-      createdAt: posts.createdAt,
-      updatedAt: posts.updatedAt,
-    })
-    .from(posts)
-    .where(eq(posts.id, postId))
-    .limit(1);
-  return row[0] ?? null;
+  try {
+    const db = getDb();
+    if (!db) return null;
+    const row = await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        content: posts.content,
+        seoKeywords: posts.seoKeywords,
+        thumbnailUrl: posts.thumbnailUrl,
+        originalUrl: posts.originalUrl,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+      })
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .limit(1);
+    return row[0] ?? null;
+  } catch (error) {
+    console.error("[NewsPage] getPostById error:", error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolved = await params;
   const postId = parsePostIdFromSlug(resolved.id);
   if (!postId) {
-    return buildPageMetadata({ title: "Bài viết không tồn tại", path: "/tin-tuc" });
+    return {
+      title: "404 - Bài viết không tồn tại | Mu Mới Ra",
+      robots: { index: false, follow: false },
+    };
   }
+
   const post = await getPostById(postId);
   if (!post) {
-    return buildPageMetadata({ title: "Bài viết không tồn tại", path: "/tin-tuc" });
+    return {
+      title: "404 - Bài viết không tồn tại | Mu Mới Ra",
+      robots: { index: false, follow: false },
+    };
   }
+
+  const canonicalPath = buildPostPath(post.id, resolvePostSlug(post));
+  const desc = `${stripHtml(post.content).slice(0, 150)}`.trim();
+
   return buildPageMetadata({
     title: `${post.title} | Mu Mới Ra`,
-    description: `${stripHtml(post.content).slice(0, 140)} | Từ khóa: ${post.seoKeywords}`,
-    path: buildPostPath(post.id, resolvePostSlug(post)),
+    description: desc || "Tin tức MU Online mới nhất",
+    path: canonicalPath,
     image: post.thumbnailUrl ?? undefined,
-    keywords: post.seoKeywords,
+    keywords: post.seoKeywords || "tin tuc mu, mu moi ra, mu online",
   });
 }
 
 export async function generateStaticParams() {
   try {
     const db = getDb();
-    const items = await db.select({ id: posts.id, slug: posts.slug }).from(posts).limit(200);
-    return items.map((item) => ({ id: `${item.id}-${resolvePostSlug(item)}` }));
+    if (!db) return [];
+    const items = await db
+      .select({ id: posts.id, title: posts.title, slug: posts.slug })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .limit(100);
+    return (items ?? []).map((item) => ({
+      id: `${item.id}-${resolvePostSlug(item)}`,
+    }));
   } catch {
     return [];
   }
@@ -68,13 +95,15 @@ export default async function NewsDetailPage({ params }: Props) {
   const post = await getPostById(postId);
   if (!post) notFound();
 
+  // 301/308 Permanent Redirect sang URL chuẩn nếu người dùng/bot truy cập bằng URL cũ hoặc id trần
   const canonicalPath = buildPostPath(post.id, resolvePostSlug(post));
-  if (resolved.id !== canonicalPath.replace("/tin-tuc/", "")) {
-    redirect(canonicalPath);
+  const expectedSegment = canonicalPath.replace("/tin-tuc/", "");
+  if (resolved.id !== expectedSegment) {
+    permanentRedirect(canonicalPath);
   }
 
-  const articleJsonLd = buildArticleJsonLd(post);
-  const tags = post.seoKeywords
+  const articleJsonLd = buildArticleJsonLd(post, post.seoKeywords);
+  const tags = (post.seoKeywords || "")
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
