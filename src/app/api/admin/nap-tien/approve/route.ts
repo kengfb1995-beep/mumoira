@@ -99,15 +99,17 @@ export async function POST(req: Request) {
       .where(eq(users.id, tx.userId))
       .limit(1);
 
-    void sendDepositApprovedNotification({
-      orderCode: tx.id,
-      userId: tx.userId,
-      email: userRows[0]?.email ?? null,
-      amount: tx.amount,
-      approvedByRole: session.role,
-    }).catch((err) => {
+    try {
+      await sendDepositApprovedNotification({
+        orderCode: tx.id,
+        userId: tx.userId,
+        email: userRows[0]?.email ?? null,
+        amount: tx.amount,
+        approvedByRole: session.role,
+      });
+    } catch (err) {
       console.error("[Approve API] Bot notification failed:", err);
-    });
+    }
 
     return NextResponse.json({
       ok: true,

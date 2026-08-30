@@ -62,19 +62,21 @@ export async function POST(req: Request) {
       .limit(1);
     const userEmail = userRows[0]?.email ?? null;
 
-    // Gửi thông báo đến Bot / Server Webhook của Admin (bọc try/catch để không gián đoạn luồng)
-    void sendDepositNotification({
-      orderCode,
-      userId: session.userId,
-      email: userEmail,
-      amount,
-      description: transferDescription,
-      bankName: bankConfig.bankName,
-      accountNumber: bankConfig.accountNumber,
-      accountName: bankConfig.accountName,
-    }).catch((err) => {
+    // Gửi thông báo đến Bot / Server Webhook của Admin (chờ gửi xong trước khi trả response)
+    try {
+      await sendDepositNotification({
+        orderCode,
+        userId: session.userId,
+        email: userEmail,
+        amount,
+        description: transferDescription,
+        bankName: bankConfig.bankName,
+        accountNumber: bankConfig.accountNumber,
+        accountName: bankConfig.accountName,
+      });
+    } catch (err) {
       console.error("[Deposit API] Send bot notification failed:", err);
-    });
+    }
 
     return NextResponse.json({
       success: true,

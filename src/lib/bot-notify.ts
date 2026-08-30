@@ -37,17 +37,27 @@ export async function getBotConfig(): Promise<BotConfig> {
  */
 async function sendTelegramMessage(token: string, chatId: string, message: string): Promise<boolean> {
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const cleanToken = token.trim();
+    const cleanChatId = chatId.trim();
+    if (!cleanToken || !cleanChatId) return false;
+
+    const url = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: chatId,
+        chat_id: cleanChatId,
         text: message,
         parse_mode: "HTML",
       }),
     });
-    return res.ok;
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error(`[BotNotify] Telegram error (${res.status}):`, errBody);
+      return false;
+    }
+    return true;
   } catch (error) {
     console.error("[BotNotify] Telegram send failed:", error);
     return false;
@@ -59,12 +69,21 @@ async function sendTelegramMessage(token: string, chatId: string, message: strin
  */
 async function sendWebhookPost(webhookUrl: string, payload: Record<string, unknown>): Promise<boolean> {
   try {
-    const res = await fetch(webhookUrl, {
+    const cleanUrl = webhookUrl.trim();
+    if (!cleanUrl) return false;
+
+    const res = await fetch(cleanUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return res.ok;
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error(`[BotNotify] Webhook error (${res.status}):`, errBody);
+      return false;
+    }
+    return true;
   } catch (error) {
     console.error("[BotNotify] Webhook POST failed:", error);
     return false;
