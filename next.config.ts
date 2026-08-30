@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@libsql/isomorphic-ws"],
+  serverExternalPackages: ["@libsql/client", "@libsql/isomorphic-ws"],
   typescript: {
     ignoreBuildErrors: true,
   },

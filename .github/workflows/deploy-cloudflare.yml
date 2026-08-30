@@ -23,11 +23,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Ensure latest Cloudflare build tools
-        run: npm i -D @opennextjs/cloudflare@latest wrangler@latest
-
       - name: Build OpenNext for Cloudflare
         run: npx opennextjs-cloudflare build
+
+      - name: Restore libSQL workerd entrypoints
+        run: node scripts/fix-open-next-libsql.cjs
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy
