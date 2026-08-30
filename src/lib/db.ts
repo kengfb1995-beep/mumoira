@@ -1,41 +1,39 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createD1Db, createTursoDb } from "@/db/client";
+import { createDb, type AppDb } from "@/db/client";
 
-let cachedDb: any = null;
-let isInitializing = false;
+function getD1Binding(): D1Database {
+  const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+  const d1 = (context?.env?.DB || (globalThis as any).DB) as D1Database | undefined;
 
-export function getDb(): any {
-  if (cachedDb) return cachedDb;
-  if (isInitializing) {
-    console.error("Antigravity: Recursive getDb() detected!");
-    return null; // Tránh treo
-  }
-  
-  isInitializing = true;
-  try {
-    const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
-    const env = context?.env || (globalThis as any);
-
-    // Ưu tiên dùng Turso Database nếu có cấu hình
-    const tursoUrl = env?.TURSO_DATABASE_URL || process.env.TURSO_DATABASE_URL;
-    const tursoAuthToken = env?.TURSO_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
-
-    if (tursoUrl) {
-      cachedDb = createTursoDb(tursoUrl, tursoAuthToken);
-    } else {
-      // Fallback về D1 nếu có binding
-      const d1 = (env?.DB || (globalThis as any).DB) as D1Database | undefined;
-      if (d1 && typeof d1.prepare === "function") {
-        cachedDb = createD1Db(d1);
-      } else {
-        throw new Error("Thiếu cấu hình Database (TURSO_DATABASE_URL hoặc Cloudflare D1)");
-      }
+  if (!d1 || typeof d1.prepare !== "function") {
+    const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+    if (isBuildPhase) {
+      return {
+        prepare() {
+          return {
+            bind() {
+              return this;
+            },
+            first: async () => null,
+            run: async () => ({ success: true }),
+            all: async () => ({ results: [] }),
+            raw: async () => [],
+          };
+        },
+        batch: async () => [],
+        exec: async () => ({ count: 0, duration: 0 }),
+        dump: async () => new ArrayBuffer(0),
+      } as unknown as D1Database;
     }
-  } catch (e) {
-    console.error("Antigravity: getDb error", e);
-  } finally {
-    isInitializing = false;
+
+    throw new Error(
+      "Thiếu D1 binding `DB`. Hãy chạy app trên Cloudflare Workers hoặc gán context.env.DB trong môi trường dev.",
+    );
   }
-  
-  return cachedDb;
+
+  return d1;
+}
+
+export function getDb(): AppDb {
+  return createDb(getD1Binding());
 }
