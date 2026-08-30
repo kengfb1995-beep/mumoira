@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createClient } from "@libsql/client/http";
+import { createClient } from "@libsql/client/web";
 import { drizzle as drizzleLibsql } from "drizzle-orm/libsql";
 import { drizzle as drizzleD1 } from "drizzle-orm/d1";
 import * as schema from "@/db/schema";

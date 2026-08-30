@@ -13,7 +13,9 @@ let cachedKey: Buffer | null = null;
 
 function getEncryptionKey() {
   if (cachedKey) return cachedKey;
-  const secret = process.env.SETTINGS_ENCRYPTION_KEY;
+  const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+  const env = context?.env || (globalThis as any);
+  const secret = env?.SETTINGS_ENCRYPTION_KEY || process.env.SETTINGS_ENCRYPTION_KEY;
   if (!secret) {
     throw new Error("Thiếu SETTINGS_ENCRYPTION_KEY");
   }

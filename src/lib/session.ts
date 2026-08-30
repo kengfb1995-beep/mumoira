@@ -11,13 +11,17 @@ type SessionPayload = {
 
 /** Khi chưa đặt SESSION_SECRET, dùng khóa riêng (SHA-256) từ SETTINGS_ENCRYPTION_KEY để tránh Worker production 500. Nên đặt SESSION_SECRET riêng khi có thể. */
 function deriveSessionSecretFromEncryptionKey(): string | null {
-  const k = process.env.SETTINGS_ENCRYPTION_KEY?.trim();
+  const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+  const env = context?.env || (globalThis as any);
+  const k = (env?.SETTINGS_ENCRYPTION_KEY || process.env.SETTINGS_ENCRYPTION_KEY)?.trim();
   if (!k) return null;
   return createHash("sha256").update(`mmr_session_v1|${k}`, "utf8").digest("hex");
 }
 
 function getSessionSecret() {
-  const explicit = process.env.SESSION_SECRET?.trim();
+  const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+  const env = context?.env || (globalThis as any);
+  const explicit = (env?.SESSION_SECRET || process.env.SESSION_SECRET)?.trim();
   if (explicit) return explicit;
 
   if (process.env.NODE_ENV === "production") {
