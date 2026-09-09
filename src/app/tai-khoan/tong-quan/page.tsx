@@ -69,7 +69,7 @@ export default async function AccountOverviewPage() {
             )}
           </div>
           <p className="text-xs text-zinc-400">
-            Bạn đang có <span className="font-bold text-amber-200">{myServers.length}</span> máy chủ ({activeServersCount} đang hiển thị). Có thể chỉnh sửa lại link website và banner 468x68 nếu nhập sai.
+            Bạn đang có <span className="font-bold text-amber-200">{myServers.length}</span> máy chủ ({activeServersCount} đang hiển thị). Có thể chỉnh sửa lại link website và banner VIP Vàng nếu nhập sai.
           </p>
           <div className="pt-1">
             <Link

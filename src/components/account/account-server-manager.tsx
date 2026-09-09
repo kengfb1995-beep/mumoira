@@ -174,7 +174,7 @@ export function AccountServerManager({
         <div>
           <h2 className="text-lg font-semibold text-amber-200 sm:text-xl">Danh sách máy chủ của bạn</h2>
           <p className="text-xs text-zinc-400">
-            Bạn có thể chỉnh sửa lại link website, link ảnh banner VIP Vàng (468x68), ngày Open/Alpha test bất cứ lúc nào nếu nhập sai.
+            Bạn có thể chỉnh sửa lại link website, link ảnh banner VIP Vàng (chuẩn 580×85, khuyến nghị 1160×170 cho nét 4K), ngày Open/Alpha test bất cứ lúc nào nếu nhập sai.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -315,7 +315,7 @@ export function AccountServerManager({
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-1.5">
                       <ImageIcon className="h-4 w-4 text-amber-400" />
-                      <span className="text-xs font-semibold text-amber-200">Banner VIP Vàng (468×68 px)</span>
+                      <span className="text-xs font-semibold text-amber-200">Banner VIP Vàng (Chuẩn 580×85 px - Khuyến nghị 1160×170 nét 4K)</span>
                       {isVipGold && (
                         <span className="text-[10px] text-amber-400/90 font-medium">(Đang hiển thị ngoài trang chủ)</span>
                       )}
@@ -343,10 +343,10 @@ export function AccountServerManager({
                         <img
                           src={srv.bannerUrl}
                           alt={`Banner ${srv.name}`}
-                          className="h-[54px] sm:h-[68px] w-auto max-w-[468px] object-cover rounded"
+                          className="h-[58px] sm:h-[85px] w-auto max-w-full object-cover rounded [image-rendering:-webkit-optimize-contrast]"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
-                              "https://placehold.co/468x68/1a1a1a/eab308?text=Loi+Link+Anh+VIP";
+                              "https://placehold.co/580x85/1a1a1a/eab308?text=Loi+Link+Anh+VIP";
                           }}
                         />
                       </div>
@@ -364,10 +364,10 @@ export function AccountServerManager({
                   ) : (
                     <div className="flex items-center justify-between rounded-lg border border-dashed border-amber-500/30 bg-amber-500/5 px-3 py-2.5 text-xs text-zinc-400">
                       <span>
-                        Chưa có banner 468×68.{" "}
+                        Chưa có banner VIP Vàng.{" "}
                         {isVipGold ? (
                           <span className="text-amber-300 font-semibold">
-                            (Máy chủ đang có gói VIP Vàng, hãy cập nhật ảnh banner để hiển thị chuẩn nhất!)
+                            (Máy chủ đang có gói VIP Vàng, hãy cập nhật ảnh banner chuẩn 580×85 hoặc 1160×170 để hiển thị nét nhất!)
                           </span>
                         ) : (
                           "Cần nâng cấp VIP Vàng để hiển thị banner tại vị trí VIP đầu trang."
@@ -482,12 +482,12 @@ export function AccountServerManager({
                 </p>
               </div>
 
-              {/* Link Banner VIP Vàng (468x68) */}
+              {/* Link Banner VIP Vàng (580x85) */}
               <div className="space-y-1.5 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-amber-300 flex items-center gap-1.5">
                     <Crown className="h-3.5 w-3.5 text-amber-400" />
-                    Link Banner VIP Vàng (468×68 px)
+                    Link Banner VIP Vàng (Chuẩn 580×85 px - Khuyến nghị 1160×170 nét 4K)
                   </label>
                   {editForm.bannerUrl && (
                     <a
@@ -506,13 +506,13 @@ export function AccountServerManager({
                   value={editForm.bannerUrl}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, bannerUrl: e.target.value }))}
                   className="w-full rounded-lg border border-amber-500/30 bg-black/60 px-3 py-2 font-mono text-zinc-100 focus:border-amber-400 focus:outline-none"
-                  placeholder="https://domain.com/banner-468x68.gif"
+                  placeholder="https://domain.com/banner-580x85.gif"
                 />
                 <p className="text-[11px] text-zinc-400">
-                  Tỉ lệ chuẩn 468×68 px. Hỗ trợ ảnh tĩnh (.jpg, .png, .webp) hoặc ảnh động (.gif).
+                  Chuẩn hiển thị 580×85 px. Khuyến nghị thiết kế kích thước 1160×170 px để hiển thị sắc nét chuẩn 4K / Retina trên mọi màn hình. Hỗ trợ ảnh tĩnh (.jpg, .png, .webp) hoặc ảnh động (.gif).
                 </p>
 
-                {/* Live Preview 468x68 */}
+                {/* Live Preview 580x85 */}
                 {editForm.bannerUrl ? (
                   <div className="mt-2 space-y-1">
                     <span className="text-[10px] font-semibold text-amber-400">Xem trước trực tiếp (Live Preview):</span>
@@ -520,11 +520,11 @@ export function AccountServerManager({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={editForm.bannerUrl}
-                        alt="Xem trước banner 468x68"
-                        className="h-[68px] w-auto max-w-[468px] object-cover rounded"
+                        alt="Xem trước banner VIP Vàng"
+                        className="h-[75px] sm:h-[85px] w-auto max-w-full object-cover rounded [image-rendering:-webkit-optimize-contrast]"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
-                            "https://placehold.co/468x68/1a1a1a/eab308?text=Link+Anh+Khong+Hop+Le";
+                            "https://placehold.co/580x85/1a1a1a/eab308?text=Link+Anh+Khong+Hop+Le";
                         }}
                       />
                     </div>

@@ -4,8 +4,8 @@
 export const BANNER_TOP = { w: 780, h: 280 } as const;
 /** Giữa nhỏ — banner giữa trang (780×110) */
 export const BANNER_MIDDLE = { w: 780, h: 110 } as const;
-/** VIP Vàng — banner ngang trong danh sách (468×68) */
-export const BANNER_VIP_GOLD = { w: 468, h: 68 } as const;
+/** VIP Vàng — banner ngang trong danh sách (chuẩn 580×85, khuyến nghị 1160×170 để đạt độ nét 4K) */
+export const BANNER_VIP_GOLD = { w: 580, h: 85 } as const;
 /** Trái / Phải — cột sidebar (204×390) */
 export const BANNER_SIDE = { w: 204, h: 390 } as const;
 

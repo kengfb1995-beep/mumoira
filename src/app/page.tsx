@@ -237,17 +237,17 @@ function ServerRow({
       {/* Cột 2: banner ngang + tiêu đề — sát nhau như mẫu portal */}
       <div className="min-w-0 min-h-0 flex-1 space-y-0.5">
         {variant === "vip" ? (
-          <div className="w-full sm:w-fit max-w-[468px]">
-            <div className="w-full sm:w-fit max-w-[468px] overflow-hidden rounded border border-amber-400/60 bg-black/20">
+          <div className="w-full min-w-0">
+            <div className="w-full min-w-0 overflow-hidden rounded border border-amber-400/60 bg-black/20">
               <a
                 href={server.websiteUrl || href}
                 target={server.websiteUrl ? "_blank" : undefined}
                 rel={server.websiteUrl ? "noopener noreferrer" : undefined}
-                className="block w-full"
+                className="block w-full min-w-0"
               >
                 <div
-                  className="relative w-full overflow-hidden rounded-sm border border-zinc-800/80 bg-[#0d0505] flex items-center justify-center"
-                  style={{ maxWidth: `${BANNER_VIP_GOLD.w}px` }}
+                  className="relative w-full overflow-hidden rounded-sm border border-zinc-800/80 bg-[#0d0505]"
+                  style={{ aspectRatio: `${BANNER_VIP_GOLD.w} / ${BANNER_VIP_GOLD.h}` }}
                 >
                   {server.bannerUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -256,13 +256,13 @@ function ServerRow({
                       alt={server.name}
                       width={BANNER_VIP_GOLD.w}
                       height={BANNER_VIP_GOLD.h}
-                      className="block w-full max-w-[468px] h-auto max-h-[68px] object-contain [image-rendering:-webkit-optimize-contrast]"
-                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
+                      loading="eager"
                     />
                   ) : (
-                    <div className="flex h-[68px] w-[468px] max-w-full items-center justify-center bg-gradient-to-br from-zinc-900 to-black text-zinc-600">
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black text-zinc-600">
                       <span className="px-2 text-center text-xs text-zinc-400">
-                        Chưa có banner (chuẩn {BANNER_VIP_GOLD.w}×{BANNER_VIP_GOLD.h})
+                        Chưa có banner (chuẩn {BANNER_VIP_GOLD.w}×{BANNER_VIP_GOLD.h} hoặc 1160×170 cho nét 4K)
                       </span>
                     </div>
                   )}
@@ -651,7 +651,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               <a
                 href="/tai-khoan/mua-dich-vu"
                 className="inline-flex items-center gap-1 rounded bg-gradient-to-r from-red-600 to-amber-600 px-2.5 py-1 text-[11px] font-black uppercase text-white shadow-sm hover:brightness-110 transition active:scale-95"
-                title="Thuê vị trí VIP Vàng 468×68"
+                title="Thuê vị trí VIP Vàng (Chuẩn 580×85 hoặc 1160×170 nét 4K)"
               >
                 <span>👑 Thuê VIP Vàng</span>
               </a>

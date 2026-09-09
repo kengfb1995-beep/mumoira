@@ -771,12 +771,12 @@ export default function ServerPage() {
                                   <div
                                     className="relative h-7 w-28 overflow-hidden rounded border border-amber-500/50 bg-black/60 shadow-sm cursor-pointer hover:border-amber-400"
                                     onClick={() => openEditModal(s)}
-                                    title="Ảnh banner VIP Vàng 468×68 (Bấm để sửa link ảnh)"
+                                    title="Ảnh banner VIP Vàng (Bấm để sửa link ảnh)"
                                   >
                                     <img
                                       src={s.bannerUrl}
                                       alt="Banner VIP"
-                                      className="h-full w-full object-cover"
+                                      className="h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
                                       loading="lazy"
                                     />
                                   </div>
@@ -787,7 +787,7 @@ export default function ServerPage() {
                                     title="Chưa có link ảnh banner VIP Vàng - Bấm để thêm"
                                   >
                                     <Plus className="h-2.5 w-2.5" />
-                                    <span>Thêm banner 468×68</span>
+                                    <span>Thêm banner VIP Vàng</span>
                                   </button>
                                 )}
                               </div>
@@ -1203,10 +1203,10 @@ export default function ServerPage() {
                 </div>
               </div>
 
-              {/* Row 3: Banner URL VIP Vàng (468x68) */}
+              {/* Row 3: Banner URL VIP Vàng (580x85) */}
               <div className="rounded-xl border border-amber-500/25 bg-black/30 p-3 space-y-2">
                 <label className="block font-bold text-amber-300">
-                  Link Ảnh Banner VIP Vàng (Kích thước khuyến nghị: 468×68 px)
+                  Link Ảnh Banner VIP Vàng (Chuẩn 580×85 px - Khuyến nghị 1160×170 px để đạt độ nét 4K)
                 </label>
                 <input
                   type="text"
@@ -1216,21 +1216,21 @@ export default function ServerPage() {
                   placeholder="https://... ảnh banner ngang (JPG, PNG, GIF, WebP)"
                 />
 
-                {/* Live 468x68 Preview */}
+                {/* Live 580x85 Preview */}
                 {editForm.bannerUrl.trim() ? (
                   <div className="space-y-1">
-                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (468×68):</span>
-                    <div className="relative w-full max-w-[468px] h-[68px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
+                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (tỉ lệ 580×85):</span>
+                    <div className="relative w-full max-w-[580px] h-[85px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
                       <img
                         src={editForm.bannerUrl}
                         alt="VIP Banner Preview"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
                       />
                     </div>
                   </div>
                 ) : (
                   <p className="text-[11px] text-zinc-500 italic">
-                    Server VIP Vàng sẽ hiển thị banner ngang 468×68 trên trang chủ. Nếu để trống sẽ hiển thị khung placeholder.
+                    Server VIP Vàng hiển thị tràn viền cột giữa trên trang chủ. Chuẩn 580×85 px (khuyến nghị 1160×170 để đạt độ nét 4K/Retina). Nếu để trống sẽ hiển thị khung placeholder.
                   </p>
                 )}
               </div>
@@ -1440,10 +1440,10 @@ export default function ServerPage() {
                 />
               </div>
 
-              {/* Row 3: Banner URL VIP Vàng (468x68) */}
+              {/* Row 3: Banner URL VIP Vàng (580x85) */}
               <div className="rounded-xl border border-amber-500/25 bg-black/30 p-3 space-y-2">
                 <label className="block font-bold text-amber-300">
-                  Link Ảnh Banner VIP Vàng (Kích thước khuyến nghị: 468×68 px)
+                  Link Ảnh Banner VIP Vàng (Chuẩn 580×85 px - Khuyến nghị 1160×170 px để đạt độ nét 4K)
                 </label>
                 <input
                   type="text"
@@ -1453,15 +1453,15 @@ export default function ServerPage() {
                   placeholder="https://... ảnh banner ngang (JPG, PNG, GIF, WebP)"
                 />
 
-                {/* Live 468x68 Preview */}
+                {/* Live 580x85 Preview */}
                 {createForm.bannerUrl.trim() && (
                   <div className="space-y-1">
-                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (468×68):</span>
-                    <div className="relative w-full max-w-[468px] h-[68px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
+                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (tỉ lệ 580×85):</span>
+                    <div className="relative w-full max-w-[580px] h-[85px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
                       <img
                         src={createForm.bannerUrl}
                         alt="VIP Banner Preview"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
                       />
                     </div>
                   </div>
