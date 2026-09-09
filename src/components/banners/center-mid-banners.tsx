@@ -20,7 +20,7 @@ export async function CenterMidBanners() {
   if (!rows.length) return null;
 
   return (
-    <div className="flex w-full max-w-[780px] mx-auto flex-col gap-1">
+    <div className="flex w-full flex-col gap-1">
       {rows.map((banner) => (
         <a
           key={banner.id}

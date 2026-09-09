@@ -7,6 +7,7 @@ import {
   Crown,
   Diamond,
   ExternalLink,
+  Gamepad2,
   Globe,
   MessageCircle,
   Share2,
@@ -209,8 +210,9 @@ export default async function ServerDetailPage({ params }: Props) {
             isVip ? "border-b border-amber-500/30 bg-amber-900/20" : "border-b border-[#1e1010] bg-[#0d0505]"
           }`}>
             {isVip && (
-              <span className="shrink-0 rounded-sm bg-gradient-to-b from-amber-400 via-amber-600 to-amber-800 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white ring-1 ring-amber-400/50 sm:text-xs">
-                ★ Vip Vàng
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-sm border border-amber-400/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-950 shadow-sm sm:text-xs">
+                <Crown className="h-3 w-3" />
+                <span>VIP Vàng</span>
               </span>
             )}
             {alphaLabel && (
@@ -244,8 +246,9 @@ export default async function ServerDetailPage({ params }: Props) {
                 )}
                 {isVip && (
                   <div className="absolute right-2 top-2">
-                    <span className="rounded-sm bg-gradient-to-b from-amber-400 to-amber-700 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white sm:text-xs">
-                      ★ VIP
+                    <span className="inline-flex items-center gap-1 rounded-sm border border-amber-300/80 bg-gradient-to-r from-amber-500 to-amber-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-950 shadow sm:text-xs">
+                      <Crown className="h-3 w-3" />
+                      <span>VIP</span>
                     </span>
                   </div>
                 )}
@@ -266,7 +269,7 @@ export default async function ServerDetailPage({ params }: Props) {
                   { icon: Diamond, label: "DROP", value: server.drop },
                   { icon: CalendarDays, label: "Alpha Test", value: server.alphaTestDate ? formatDateFull(server.alphaTestDate) : "—" },
                   { icon: CalendarDays, label: "Open Beta", value: server.openBetaDate ? formatDateFull(server.openBetaDate) : "—" },
-                  { icon: Shield, label: "VIP", value: isVip ? "★ Vip Vàng" : "Không" },
+                  { icon: Shield, label: "VIP", value: isVip ? "VIP Vàng" : "Không" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-start gap-2 rounded border border-[#1e1010] bg-[#0a0505] px-2.5 py-2">
                     <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" aria-hidden />
@@ -285,10 +288,10 @@ export default async function ServerDetailPage({ params }: Props) {
                     href={server.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded border border-amber-700/50 bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-300 transition hover:border-amber-600 hover:bg-amber-900/40"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/50 bg-amber-950/30 px-3 py-1.5 text-xs font-bold text-amber-300 shadow-sm transition hover:border-amber-400 hover:bg-amber-900/50 hover:text-white"
                   >
                     <Globe className="h-3.5 w-3.5" aria-hidden />
-                    Trang chủ server
+                    <span>Trang chủ server</span>
                   </a>
                 ) : null}
                 {server.facebookUrl ? (
@@ -296,10 +299,10 @@ export default async function ServerDetailPage({ params }: Props) {
                     href={server.facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded border border-blue-700/50 bg-blue-900/20 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:border-blue-600 hover:bg-blue-900/40"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-blue-600/50 bg-blue-950/30 px-3 py-1.5 text-xs font-bold text-blue-300 shadow-sm transition hover:border-blue-400 hover:bg-blue-900/50 hover:text-white"
                   >
                     <Share2 className="h-3.5 w-3.5" aria-hidden />
-                    Facebook
+                    <span>Facebook</span>
                   </a>
                 ) : null}
                 {server.zaloUrl ? (
@@ -307,38 +310,38 @@ export default async function ServerDetailPage({ params }: Props) {
                     href={server.zaloUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded border border-blue-400/50 bg-blue-400/10 px-3 py-1.5 text-xs font-semibold text-blue-300 transition hover:border-blue-400/20"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-sky-600/50 bg-sky-950/30 px-3 py-1.5 text-xs font-bold text-sky-300 shadow-sm transition hover:border-sky-400 hover:bg-sky-900/50 hover:text-white"
                   >
                     <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-                    Zalo
+                    <span>Zalo</span>
                   </a>
                 ) : null}
               </div>
 
               {/* CTA buttons */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 <a
                   href={server.websiteUrl ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-1.5 rounded px-4 py-2.5 text-sm font-bold transition sm:px-5 ${
+                  className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-black uppercase tracking-wider transition-all shadow-md active:scale-95 sm:px-6 ${
                     isVip
-                      ? "border border-amber-500/60 bg-amber-600/40 text-amber-100 hover:bg-amber-600/60"
-                      : "border border-red-700/50 bg-red-900/40 text-red-200 hover:bg-red-800/50"
+                      ? "border border-amber-300 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-zinc-950 shadow-[0_2px_14px_rgba(245,158,11,0.4)] hover:brightness-110 hover:shadow-[0_0_20px_rgba(245,158,11,0.6)]"
+                      : "border border-red-500/80 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-[0_2px_14px_rgba(225,29,72,0.4)] hover:brightness-110 hover:shadow-[0_0_20px_rgba(225,29,72,0.6)]"
                   }`}
                 >
-                  <ExternalLink className="h-4 w-4" aria-hidden />
-                  Chơi ngay
+                  <Gamepad2 className="h-4 w-4" aria-hidden />
+                  <span>Chơi ngay</span>
                 </a>
                 {server.websiteUrl ? (
                   <a
                     href={server.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded border border-[#2a1515] bg-[#0a0505] px-4 py-2.5 text-sm font-semibold text-zinc-400 transition hover:border-red-700/40 hover:text-zinc-200 sm:px-5"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#2d4460] bg-[#121c27]/90 px-4 py-2.5 text-sm font-bold text-zinc-200 shadow-sm transition hover:border-amber-400/60 hover:text-white sm:px-5"
                   >
                     <ExternalLink className="h-4 w-4" aria-hidden />
-                    Truy cập website
+                    <span>Truy cập website</span>
                   </a>
                 ) : null}
               </div>
@@ -408,9 +411,14 @@ export default async function ServerDetailPage({ params }: Props) {
                       </p>
                     </div>
                     <div className="shrink-0">
-                      <span className={`text-[11px] font-semibold ${relIsVip ? "text-amber-400" : "text-zinc-500"}`}>
-                        {relIsVip ? "★ VIP" : "—"}
-                      </span>
+                      {relIsVip ? (
+                        <span className="inline-flex items-center gap-1 rounded border border-amber-400/50 bg-amber-950/60 px-2 py-0.5 text-[10px] font-black text-amber-300">
+                          <Crown className="h-3 w-3" />
+                          <span>VIP</span>
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-semibold text-zinc-600">—</span>
+                      )}
                     </div>
                   </article>
                 );

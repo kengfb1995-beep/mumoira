@@ -34,20 +34,22 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-zinc-200 bg-zinc-50 p-2 text-zinc-700 lg:hidden"
+        className="rounded-md border border-[#22354a] bg-[#121c27] p-2 text-zinc-300 hover:border-red-500 hover:text-white lg:hidden transition"
         aria-label="Mở menu"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden">
-          <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
-            <span className="text-lg font-bold text-zinc-900">Menu</span>
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#0b1016]/98 backdrop-blur-xl lg:hidden text-zinc-200">
+          <div className="flex items-center justify-between border-b border-sky-950/60 px-4 py-3 bg-[#0e1620]">
+            <span className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-red-400">
+              Menu MU Mới Ra
+            </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-md border border-zinc-200 bg-zinc-50 p-2 text-zinc-700"
+              className="rounded-md border border-[#22354a] bg-[#121c27] p-2 text-zinc-400 hover:text-white"
               aria-label="Đóng menu"
             >
               <X className="h-5 w-5" />
@@ -55,7 +57,7 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
           </div>
 
           <nav className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -63,9 +65,9 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 text-base font-semibold text-zinc-700 hover:bg-white hover:border-zinc-300 transition"
+                    className="flex items-center gap-3 rounded-lg border border-[#22354a] bg-[#121c27]/90 px-4 py-3 text-base font-bold text-zinc-200 hover:border-amber-400 hover:bg-[#192737] hover:text-white transition shadow-sm"
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5 text-amber-400" />
                     {item.label}
                   </Link>
                 );
@@ -75,7 +77,7 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
 
               {!isLoggedIn && (
                 <>
-                  <div className="my-4 border-t border-zinc-100" />
+                  <div className="my-4 border-t border-sky-950/60" />
                   {authItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -83,7 +85,7 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-3 rounded-lg border border-red-100 bg-red-600 px-4 py-3 text-base font-bold text-white hover:bg-red-700 shadow-sm"
+                        className="flex items-center gap-3 rounded-lg border border-red-500/80 bg-gradient-to-r from-red-600 to-rose-700 px-4 py-3 text-base font-black uppercase text-white shadow-md hover:brightness-110"
                       >
                         <Icon className="h-5 w-5" />
                         {item.label}

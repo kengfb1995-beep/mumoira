@@ -48,7 +48,7 @@ export async function SideBanner({ side }: SideBannerProps) {
               {isMp4Url(banner.imageUrl) ? (
                 <video
                   src={banner.imageUrl}
-                  className="max-h-full max-w-full object-contain"
+                  className="h-full w-full object-cover"
                   autoPlay
                   muted
                   loop
@@ -62,7 +62,7 @@ export async function SideBanner({ side }: SideBannerProps) {
                   alt={`Banner ${side} #${banner.id}`}
                   width={BANNER_SIDE.w}
                   height={BANNER_SIDE.h}
-                  className="max-h-full max-w-full object-contain"
+                  className="h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
                   loading="lazy"
                 />
               )}
@@ -79,7 +79,7 @@ export async function SideBanner({ side }: SideBannerProps) {
               <p className="text-[11px] font-bold text-amber-200/90 group-hover:text-amber-100">
                 Thuê vị trí này
               </p>
-              <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[9px] font-semibold text-amber-300">
+              <span className="rounded-md border border-amber-500/40 bg-amber-500/20 px-2 py-0.5 text-[9px] font-black text-amber-300">
                 204×390 px
               </span>
             </a>

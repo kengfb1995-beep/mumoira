@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Crown } from "lucide-react";
 import { useUi } from "@/components/providers/ui-provider";
 import { toDatetimeLocalValueVn } from "@/lib/vn-datetime";
 
@@ -264,9 +265,10 @@ export function PostServerForm() {
       <button
         onClick={createServer}
         disabled={loading || (balance != null && balance < 5000)}
-        className="rounded-xl border border-red-700/60 bg-red-800/85 px-4 py-2.5 font-semibold text-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/80 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 px-6 py-2.5 text-sm font-black uppercase tracking-wider text-white shadow-[0_4px_16px_rgba(225,29,72,0.4)] transition-all hover:brightness-110 hover:shadow-[0_0_24px_rgba(225,29,72,0.6)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Đang tạo..." : "Đăng server (5.000đ)"}
+        <Crown className="h-4 w-4" />
+        <span>{loading ? "Đang tạo..." : "Đăng server (5.000đ)"}</span>
       </button>
 
       {!!servers.length && (
@@ -299,10 +301,11 @@ function ServerDateEditor({
         <input type="datetime-local" value={alphaTestDate} onChange={(e) => setAlphaTestDate(e.target.value)} className="datetime-local-dark w-full rounded-lg border border-amber-500/30 bg-black/40 px-3 py-2 text-sm text-zinc-100" />
       </div>
       <button
-        className="mt-2 rounded-lg border border-amber-500/30 bg-black/30 px-3 py-1.5 text-sm text-amber-100"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-500/60 bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-1.5 text-xs font-black uppercase text-zinc-950 shadow-sm transition hover:brightness-110 active:scale-95"
         onClick={() => onSave(server.id, openBetaDate, alphaTestDate)}
       >
-        Lưu ngày Open/Alpha
+        <CheckCircle2 className="h-3.5 w-3.5" />
+        <span>Lưu ngày Open/Alpha</span>
       </button>
     </div>
   );

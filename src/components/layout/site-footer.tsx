@@ -6,7 +6,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-6 border-t border-amber-500/20 bg-black/40 pt-8 pb-6">
-      <div className="mx-auto w-full max-w-[1480px] px-3 md:px-4 lg:px-6">
+      <div className="mx-auto w-full max-w-[1240px] px-3 md:px-4 lg:px-6">
         <div className="mb-8 grid gap-6 md:grid-cols-4">
           <div>
             <div className="mb-3 flex items-center gap-2">

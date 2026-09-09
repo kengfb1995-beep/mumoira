@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { ExternalLink, Search } from "lucide-react";
+import {
+  CheckCircle2,
+  Crown,
+  ExternalLink,
+  Flame,
+  Gamepad2,
+  Globe,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Zap,
+} from "lucide-react";
 import { CenterMidBanners } from "@/components/banners/center-mid-banners";
 import { CenterTopBanner } from "@/components/banners/center-top-banner";
 import { VipGoldRibbon } from "@/components/servers/vip-gold-ribbon";
@@ -224,13 +236,13 @@ function ServerRow({
         </span>
         <a
           href={href}
-          className={`text-sm font-bold underline ${
-            variant === "vip" || isLightRow
-              ? "text-[#2a78ad] decoration-[#2a78ad]/50 hover:text-[#1f5f8f]"
-              : "text-sky-400 decoration-sky-500/60 hover:text-sky-300"
+          className={`mt-1 inline-flex items-center justify-center rounded border px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide transition-all shadow-sm active:scale-95 ${
+            variant === "vip"
+              ? "border-amber-500/70 bg-gradient-to-b from-zinc-950 via-zinc-900 to-amber-950/60 text-amber-300 hover:border-amber-400 hover:text-amber-100 hover:shadow-amber-500/30"
+              : "border-sky-700/60 bg-gradient-to-b from-slate-900 to-sky-950 text-sky-300 hover:border-sky-400 hover:text-sky-100"
           }`}
         >
-          [Chi tiết MU]
+          Chi tiết
         </a>
       </div>
 
@@ -283,21 +295,25 @@ function ServerRow({
 
         {variant === "regular" || variant === "silver" ? (
           <div className="grid grid-cols-1 gap-x-5 gap-y-0.5 text-sm leading-tight text-zinc-800 sm:grid-cols-2 sm:text-[15px]">
-            <p>
-              <span className="font-medium text-zinc-700">- Server:</span> {serverSiteLabel(server)}
+            <p className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5 text-zinc-500 shrink-0" aria-hidden="true" />
+              <span className="font-medium text-zinc-700">Server:</span> {serverSiteLabel(server)}
             </p>
-            <p>
-              <span className="font-medium text-zinc-700">- Alpha Test:</span>{" "}
+            <p className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-emerald-600 shrink-0" aria-hidden="true" />
+              <span className="font-medium text-zinc-700">Alpha Test:</span>{" "}
               <span className={alphaToday ? "font-semibold text-[#1a7f45]" : "text-zinc-800"}>
                 {formatDateTimeShortVietnam(server.alphaTestDate) || "—"}
               </span>
             </p>
-            <p>
-              <span className="font-medium text-zinc-700">- Phiên bản:</span>{" "}
+            <p className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-zinc-500 shrink-0" aria-hidden="true" />
+              <span className="font-medium text-zinc-700">Phiên bản:</span>{" "}
               <span className="text-zinc-800">Season {server.version}</span>
             </p>
-            <p>
-              <span className="font-medium text-zinc-700">- Open Beta:</span>{" "}
+            <p className="flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-red-600 shrink-0" aria-hidden="true" />
+              <span className="font-medium text-zinc-700">Open Beta:</span>{" "}
               <span className={openLineRed ? "font-semibold text-[#c0392b]" : "text-zinc-800"}>
                 {formatDateTimeShortVietnam(server.openBetaDate) || "—"}
               </span>
@@ -306,16 +322,18 @@ function ServerRow({
         ) : null}
 
         {variant === "vip" ? (
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 pt-0.5">
             {server.websiteUrl ? (
               <a
                 href={server.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-w-0 max-w-full items-center gap-1 text-sm font-medium text-zinc-600 hover:text-amber-700"
+                className="inline-flex max-w-[260px] sm:max-w-[340px] items-center gap-1.5 rounded-md border border-amber-600/40 bg-black/65 px-2.5 py-1 text-xs font-mono font-medium text-amber-100 hover:border-amber-400 hover:text-amber-200 transition-all shadow-sm group/web"
+                title="Website chính thức của máy chủ"
               >
-                <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <Globe className="h-3.5 w-3.5 shrink-0 text-amber-400 group-hover/web:animate-spin" aria-hidden="true" />
                 <span className="truncate">{server.websiteUrl}</span>
+                <ExternalLink className="h-3 w-3 shrink-0 text-zinc-400 group-hover/web:text-amber-300" aria-hidden="true" />
               </a>
             ) : null}
             {server.websiteUrl ? (
@@ -323,9 +341,10 @@ function ServerRow({
                 href={server.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 rounded border border-amber-700/60 bg-amber-600 px-3 py-1 text-sm font-semibold text-white hover:bg-amber-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/90 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-zinc-950 shadow-md shadow-amber-500/30 transition-all duration-200 hover:brightness-115 hover:shadow-amber-500/60 active:scale-95"
               >
-                Chơi ngay
+                <Gamepad2 className="h-3.5 w-3.5 text-zinc-950" aria-hidden="true" />
+                <span>Chơi ngay</span>
               </a>
             ) : null}
           </div>
@@ -343,14 +362,20 @@ function ServerRow({
         {variant === "vip" ? (
           <>
             <VipGoldRibbon />
-            <div className="space-y-0 text-sm leading-tight text-zinc-800">
-              <p>
-                <span className="font-medium text-zinc-600">Alpha:</span>{" "}
-                {formatDateTimeShortVietnam(server.alphaTestDate) || "—"}
+            <div className="mt-1 space-y-0.5 text-xs sm:text-xs leading-tight text-zinc-900 font-medium">
+              <p className="flex items-center gap-1">
+                <Zap className="h-3 w-3 text-emerald-600 shrink-0" aria-hidden="true" />
+                <span className="text-zinc-600">Alpha:</span>{" "}
+                <span className="font-semibold text-zinc-900">
+                  {formatDateTimeShortVietnam(server.alphaTestDate) || "—"}
+                </span>
               </p>
-              <p className={openToday ? "font-semibold text-red-600" : "text-zinc-800"}>
-                <span className={openToday ? "font-medium text-red-600" : "font-medium text-zinc-600"}>Open:</span>{" "}
-                {formatDateTimeShortVietnam(server.openBetaDate) || "—"}
+              <p className={`flex items-center gap-1 ${openToday ? "font-bold text-red-600" : "text-zinc-900"}`}>
+                <Flame className="h-3 w-3 text-red-600 shrink-0" aria-hidden="true" />
+                <span className={openToday ? "text-red-600" : "text-zinc-600"}>Open:</span>{" "}
+                <span>
+                  {formatDateTimeShortVietnam(server.openBetaDate) || "—"}
+                </span>
               </p>
             </div>
           </>
@@ -473,38 +498,40 @@ function ListFilterBar({
         <span className="text-xs font-bold text-zinc-400 sm:text-sm">Bộ lọc:</span>
         <a
           href={buildHomeHref(1, { filter: null, q })}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+          className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
             allActive
-              ? "bg-[#25394f] text-white shadow-sm border border-sky-400/40"
-              : "bg-[#16222f] text-zinc-300 border border-zinc-700/60 hover:border-zinc-500 hover:text-white"
+              ? "border border-amber-400/80 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-zinc-950 shadow-[0_2px_10px_rgba(245,158,11,0.35)]"
+              : "border border-[#2d4460] bg-[#162332]/90 text-zinc-300 hover:border-amber-400/50 hover:text-white"
           }`}
         >
           Tất cả
         </a>
         <a
           href={buildHomeHref(1, { filter: "alpha_today", q })}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
             alphaActive
-              ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/30 border border-emerald-400/60"
-              : "bg-emerald-950/50 text-emerald-300 border border-emerald-700/40 hover:bg-emerald-900/60 hover:text-white"
+              ? "border border-emerald-400 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white shadow-[0_2px_10px_rgba(16,185,129,0.4)]"
+              : "border border-emerald-700/50 bg-[#0d221c]/80 text-emerald-300 hover:border-emerald-500 hover:bg-[#123028] hover:text-white"
           }`}
         >
-          🟢 Alpha Test hôm nay
+          <Zap className="h-3.5 w-3.5 text-emerald-400" />
+          <span>Alpha Test hôm nay</span>
         </a>
         <a
           href={buildHomeHref(1, { filter: "open_today", q })}
-          className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-all sm:text-xs ${
             openActive
-              ? "bg-red-600 text-white shadow-sm shadow-red-500/30 border border-red-400/60"
-              : "bg-red-950/50 text-red-300 border border-red-700/40 hover:bg-red-900/60 hover:text-white"
+              ? "border border-rose-400 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-[0_2px_10px_rgba(225,29,72,0.4)]"
+              : "border border-rose-800/50 bg-[#250d11]/80 text-rose-300 hover:border-rose-500 hover:bg-[#341218] hover:text-white"
           }`}
         >
-          🔴 Open Beta hôm nay
+          <Flame className="h-3.5 w-3.5 text-rose-400" />
+          <span>Open Beta hôm nay</span>
         </a>
         {(filter === "alpha_today" || filter === "open_today") && (
           <a
             href={buildHomeHref(1, { filter: null, q })}
-            className="text-xs font-semibold text-zinc-400 underline hover:text-zinc-200"
+            className="inline-flex items-center rounded-md border border-zinc-700/60 bg-zinc-900/70 px-2 py-1 text-[11px] font-semibold text-zinc-400 transition hover:border-zinc-500 hover:text-zinc-200"
           >
             Xóa lọc
           </a>
@@ -518,14 +545,14 @@ function ListFilterBar({
           name="q"
           defaultValue={q}
           placeholder="Tìm kiếm máy chủ MU..."
-          className="min-w-0 flex-1 rounded-md border border-[#263a4e] bg-black/60 px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-red-500 focus:outline-none sm:text-sm"
+          className="min-w-0 flex-1 rounded-md border border-[#263a4e] bg-black/60 px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none sm:text-sm"
         />
         <button
           type="submit"
-          className="flex shrink-0 items-center justify-center rounded-md border border-sky-600/70 bg-gradient-to-r from-sky-700 to-sky-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm shadow-sky-600/30 transition hover:brightness-110 sm:px-4"
+          className="flex shrink-0 items-center justify-center rounded-md border border-amber-400/80 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-3.5 py-1.5 text-xs font-black text-zinc-950 shadow-md shadow-amber-500/30 transition hover:brightness-110 active:scale-95 sm:px-4"
           aria-label="Tìm kiếm"
         >
-          <Search className="h-4 w-4" />
+          <Search className="h-4 w-4 text-zinc-950" />
         </button>
       </form>
     </div>
@@ -613,22 +640,25 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             </div>
             <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                 {allServers.length} Server hoạt động
               </span>
               {vipGoldCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
-                  👑 {vipGoldCount} VIP Vàng
+                  <Crown className="h-3 w-3 text-amber-400" />
+                  {vipGoldCount} VIP Vàng
                 </span>
               )}
               {silverCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-slate-400/40 bg-slate-800/60 px-2.5 py-0.5 text-[11px] font-bold text-slate-300">
-                  🛡️ {silverCount} VIP Bạc
+                  <ShieldCheck className="h-3 w-3 text-slate-300" />
+                  {silverCount} VIP Bạc
                 </span>
               )}
               {freePoolCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-950/50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-300">
-                  🎮 {freePoolCount} Đăng miễn phí
+                  <Gamepad2 className="h-3 w-3 text-sky-400" />
+                  {freePoolCount} Đăng miễn phí
                 </span>
               )}
             </div>
@@ -637,23 +667,24 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
         {/* Danh sách Mu VIP Vàng */}
         <section className="w-full overflow-hidden rounded-md border border-amber-400/70 bg-[#fffdf0] shadow-md shadow-amber-500/10">
-          <div className="flex items-center justify-between border-b border-amber-300/90 bg-gradient-to-r from-[#ffeaa7] via-[#fff3c4] to-[#ffeaa7] px-2.5 py-1">
+          <div className="flex items-center justify-between border-b border-amber-300/90 bg-gradient-to-r from-[#ffeaa7] via-[#fff3c4] to-[#ffeaa7] px-2.5 py-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-red-600 text-sm" aria-hidden>◆</span>
+              <Sparkles className="h-4 w-4 text-amber-600 animate-pulse" />
               <h2 className="text-sm font-extrabold uppercase tracking-wide text-zinc-900 sm:text-[15px]">
                 Danh Sách Mu VIP Vàng
               </h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-block rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-900 border border-amber-600/30">
+              <span className="hidden sm:inline-block rounded border border-amber-600/30 bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-900">
                 HOT PREMIUM
               </span>
               <a
                 href="/tai-khoan/mua-dich-vu"
-                className="inline-flex items-center gap-1 rounded bg-gradient-to-r from-red-600 to-amber-600 px-2.5 py-1 text-[11px] font-black uppercase text-white shadow-sm hover:brightness-110 transition active:scale-95"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/90 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-3 py-1 text-xs font-black uppercase text-zinc-950 shadow-[0_2px_12px_rgba(245,158,11,0.4)] transition-all hover:brightness-110 hover:shadow-[0_0_16px_rgba(245,158,11,0.6)] active:scale-95"
                 title="Thuê vị trí VIP Vàng (Chuẩn 580×85 hoặc 1160×170 nét 4K)"
               >
-                <span>👑 Thuê VIP Vàng</span>
+                <Crown className="h-3.5 w-3.5 text-zinc-950" />
+                <span>Thuê VIP Vàng</span>
               </a>
             </div>
           </div>
@@ -663,13 +694,17 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                 <ServerRow key={server.id} server={server} index={idx + 1} variant="vip" now={now} />
               ))
             ) : (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded border border-dashed border-amber-400/60 bg-amber-50/60 text-amber-900 text-xs font-medium">
-                <p>⭐ Chưa có máy chủ trong danh sách VIP Vàng. Vị trí vàng tiếp cận hàng ngàn game thủ mỗi ngày!</p>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded-md border border-dashed border-amber-400/60 bg-amber-50/60 text-amber-900 text-xs font-medium">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-600 shrink-0" />
+                  <p>Chưa có máy chủ trong danh sách VIP Vàng. Vị trí vàng tiếp cận hàng ngàn game thủ mỗi ngày!</p>
+                </div>
                 <a
                   href="/tai-khoan/mua-dich-vu"
-                  className="rounded bg-amber-500 px-3 py-1 text-xs font-bold text-black hover:bg-amber-400 transition shrink-0"
+                  className="inline-flex items-center gap-1 rounded-md border border-amber-400 bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-1 text-xs font-black uppercase text-zinc-950 shadow-sm hover:brightness-110 transition active:scale-95 shrink-0"
                 >
-                  Đăng ký ngay
+                  <Crown className="h-3.5 w-3.5 text-zinc-950" />
+                  <span>Đăng ký ngay</span>
                 </a>
               </div>
             )}
@@ -680,9 +715,9 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         <section className="w-full">
           {hasAnyNonGold ? (
             <>
-              <div className="mb-1 flex items-center justify-between border-b border-sky-800/40 bg-gradient-to-r from-sky-950/40 via-sky-900/30 to-sky-950/40 px-2.5 py-1 rounded-t-md">
+              <div className="mb-1 flex items-center justify-between border-b border-sky-800/40 bg-gradient-to-r from-sky-950/40 via-sky-900/30 to-sky-950/40 px-2.5 py-1.5 rounded-t-md">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-red-500 text-sm" aria-hidden>◆</span>
+                  <Flame className="h-4 w-4 text-rose-500" />
                   <h2 className="text-sm font-bold uppercase tracking-wide text-amber-100 sm:text-[15px]">
                     Danh Sách Mu Mới Ra Miễn Phí Hôm Nay
                   </h2>
@@ -694,7 +729,10 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
               {vipSilverServers.length > 0 ? (
                 <div className="mb-2 mt-1.5 space-y-1.5 sm:mt-2 sm:space-y-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-300 sm:text-sm">VIP Bạc</h3>
+                  <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-300 sm:text-sm">
+                    <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+                    <span>VIP Bạc</span>
+                  </h3>
                   {vipSilverServers.map((server, idx) => (
                     <ServerRow
                       key={server.id}
@@ -710,8 +748,9 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               {freePoolCount > 0 ? (
                 <>
                   {vipSilverServers.length > 0 ? (
-                    <h3 className="mb-1 mt-2 text-xs font-bold uppercase tracking-wide text-zinc-400 sm:mt-2.5 sm:text-sm">
-                      Đăng miễn phí
+                    <h3 className="mb-1 mt-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-zinc-400 sm:mt-2.5 sm:text-sm">
+                      <Gamepad2 className="h-3.5 w-3.5 text-sky-400" />
+                      <span>Đăng miễn phí</span>
                     </h3>
                   ) : null}
                   <ListFilterBar filter={filter} q={qRaw} hasServers={freePoolCount > 0} />
@@ -739,7 +778,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                   ) : (
                     <div className="rounded-lg border border-[#1e1010] bg-[#0a0505] p-5 text-center sm:p-6">
                       <p className="text-sm text-zinc-500">Không có server nào khớp bộ lọc hoặc từ khóa.</p>
-                      <a href={buildHomeHref(1, { filter: null, q: null })} className="mt-2 inline-block text-sm text-sky-400 underline">
+                      <a href={buildHomeHref(1, { filter: null, q: null })} className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-sky-600/60 bg-sky-950/40 px-3 py-1.5 text-xs font-bold text-sky-300 hover:bg-sky-900/60 hover:border-sky-500 hover:text-white transition">
                         Xem toàn bộ danh sách
                       </a>
                     </div>

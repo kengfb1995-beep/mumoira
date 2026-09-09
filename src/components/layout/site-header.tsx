@@ -31,7 +31,7 @@ export async function SiteHeader() {
       {/* Subtle top glowing bar */}
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-red-600 via-50% to-transparent opacity-80" />
       
-      <div className="mx-auto flex h-12 max-h-12 w-full max-w-[1480px] items-center justify-between gap-2 px-3 sm:h-12 sm:max-h-12 md:px-4 lg:px-6">
+      <div className="mx-auto flex h-12 max-h-12 w-full max-w-[1240px] items-center justify-between gap-2 px-3 sm:h-12 sm:max-h-12 md:px-4 lg:px-6">
         <Link href="/" className="group inline-flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

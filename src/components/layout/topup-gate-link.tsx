@@ -58,10 +58,10 @@ export function TopupGateLinkMobile({
         }
         onNavigate?.();
       }}
-      className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-black/30 px-4 py-3 text-base font-semibold text-amber-100 hover:border-amber-400/50 hover:bg-red-950/40"
+      className="flex items-center gap-3 rounded-lg border border-amber-400/60 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-4 py-3 text-base font-black uppercase tracking-wider text-zinc-950 shadow-md shadow-amber-500/20 transition hover:brightness-110"
     >
-      <Wallet className="h-5 w-5" aria-hidden="true" />
-      Nạp Tiền
+      <Wallet className="h-5 w-5 text-zinc-950" aria-hidden="true" />
+      <span>Nạp Tiền</span>
     </Link>
   );
 }
