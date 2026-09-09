@@ -1,17 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, LogIn, ShieldAlert, Sparkles } from "lucide-react";
+import { safeInternalPath } from "@/lib/safe-redirect";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const errorParam = searchParams.get("error");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    errorParam === "forbidden" ? "Tài khoản của bạn không có quyền truy cập Admin." : ""
+  );
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+
+  useEffect(() => {
+    // If already logged in as admin, forward directly
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        if (res.ok) {
+          const data = (await res.json()) as { user?: { role?: string } | null };
+          if (data.user && (data.user.role === "admin" || data.user.role === "super_admin")) {
+            const target = safeInternalPath(nextParam) || "/mu-admin/tong-quan";
+            router.replace(target);
+          }
+        }
+      } catch {}
+    }
+    void checkAuth();
+  }, [nextParam, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,13 +58,13 @@ export default function AdminLoginPage() {
 
       // Verify admin role
       if (data.user?.role !== "admin" && data.user?.role !== "super_admin") {
-        setError("Tài khoản này không có quyền truy cập Admin.");
-        // Clear session
+        setError("Tài khoản này không có quyền truy cập Admin Panel.");
         await fetch("/api/auth/logout", { method: "POST" });
         return;
       }
 
-      router.push("/admin");
+      const target = safeInternalPath(nextParam) || "/mu-admin/tong-quan";
+      router.push(target);
       router.refresh();
     } catch {
       setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
@@ -48,6 +72,7 @@ export default function AdminLoginPage() {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#070304] px-4">
@@ -147,3 +172,18 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#070304] text-amber-200">
+          Đang tải...
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+

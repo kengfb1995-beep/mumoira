@@ -58,9 +58,33 @@ function decode(token: string): SessionPayload | null {
   }
 }
 
+export function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const context = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+  const env = context?.env || (globalThis as any);
+  const rawList = (env?.ADMIN_EMAILS || env?.ADMIN_EMAIL || process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "")?.trim();
+  const allowed = new Set<string>(
+    rawList
+      .split(/[,;\s]+/)
+      .map((e: string) => e.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  // Default fallback owner admin email
+  allowed.add("kengfb1995@gmail.com");
+  return allowed.has(email.trim().toLowerCase());
+}
+
 export async function createSession(payload: SessionPayload) {
   const store = await cookies();
-  store.set(SESSION_COOKIE_NAME, encode(payload), {
+  const effectiveRole =
+    payload.role === "super_admin" || isAdminEmail(payload.email)
+      ? "super_admin"
+      : payload.role;
+  const finalPayload: SessionPayload = {
+    ...payload,
+    role: effectiveRole,
+  };
+  store.set(SESSION_COOKIE_NAME, encode(finalPayload), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -79,7 +103,12 @@ export async function getSession(): Promise<SessionPayload | null> {
     const store = await cookies();
     const token = store.get(SESSION_COOKIE_NAME)?.value;
     if (!token) return null;
-    return decode(token);
+    const session = decode(token);
+    if (!session) return null;
+    if (session.role !== "super_admin" && isAdminEmail(session.email)) {
+      return { ...session, role: "super_admin" };
+    }
+    return session;
   } catch {
     return null;
   }
@@ -91,3 +120,4 @@ export async function getAdminSession(): Promise<SessionPayload | null> {
   if (session.role !== "admin" && session.role !== "super_admin") return null;
   return session;
 }
+

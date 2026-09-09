@@ -10,9 +10,13 @@ export async function requireUser() {
 }
 
 export async function requireAdmin() {
-  const session = await requireUser();
+  const session = await getSession();
+  if (!session) {
+    redirect("/mu-admin/dang-nhap");
+  }
   if (session.role !== "admin" && session.role !== "super_admin") {
-    redirect("/");
+    redirect("/mu-admin/dang-nhap?error=forbidden");
   }
   return session;
 }
+

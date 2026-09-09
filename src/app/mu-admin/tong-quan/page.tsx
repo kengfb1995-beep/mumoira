@@ -1,12 +1,15 @@
-import { count, desc } from "drizzle-orm";
-import { Crown, Flag, ImageIcon, KeyRound, ShieldCheck, Users } from "lucide-react";
+import { count, desc, eq } from "drizzle-orm";
+import { Crown, Flag, ImageIcon, KeyRound, ShieldCheck, Users, Clock } from "lucide-react";
+import Link from "next/link";
 import { banners, cronRuns, servers, transactions, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminTongQuanPage() {
+  await requireAdmin();
   const db = getDb();
 
-  const [allUsers, allServers, allBanners, recentCronRuns, recentTransactions, [userCount], [serverCount], [bannerCount]] = await Promise.all([
+  const [allUsers, allServers, allBanners, recentCronRuns, recentTransactions, [userCount], [serverCount], [bannerCount], [pendingServerCount]] = await Promise.all([
     db.select({ id: users.id, email: users.email, role: users.role, balance: users.balance, createdAt: users.createdAt }).from(users).orderBy(desc(users.id)).limit(5),
     db.select({ id: servers.id, name: servers.name, version: servers.version, exp: servers.exp, vipPackageType: servers.vipPackageType, status: servers.status, createdAt: servers.createdAt }).from(servers).orderBy(desc(servers.id)).limit(5),
     db.select({ id: banners.id, position: banners.position, status: banners.status, imageUrl: banners.imageUrl }).from(banners).orderBy(desc(banners.id)).limit(5),
@@ -15,7 +18,9 @@ export default async function AdminTongQuanPage() {
     db.select({ n: count() }).from(users),
     db.select({ n: count() }).from(servers),
     db.select({ n: count() }).from(banners),
+    db.select({ n: count() }).from(servers).where(eq(servers.status, "pending")),
   ]);
+
 
   return (
     <div className="space-y-6">
@@ -30,11 +35,35 @@ export default async function AdminTongQuanPage() {
       </header>
 
       {/* Stats */}
-      <section className="grid gap-3 md:grid-cols-3">
+      {Number(pendingServerCount?.n ?? 0) > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/50 bg-amber-950/30 p-4 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+          <div className="flex items-center gap-3">
+            <Clock className="h-6 w-6 text-amber-400 animate-pulse shrink-0" />
+            <div>
+              <p className="font-bold text-amber-200 text-sm">
+                Có {Number(pendingServerCount?.n ?? 0)} máy chủ đang chờ duyệt!
+              </p>
+              <p className="text-xs text-zinc-400">
+                Nhấn vào để xem chi tiết và duyệt các máy chủ này sang trạng thái hoạt động.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/mu-admin/server"
+            className="self-start sm:self-auto rounded-xl border border-amber-500/50 bg-amber-500/20 px-4 py-2 text-xs font-bold text-amber-100 hover:bg-amber-500/30 transition shadow-sm shrink-0"
+          >
+            Xem danh sách chờ duyệt →
+          </Link>
+        </div>
+      )}
+
+      <section className="grid gap-3 md:grid-cols-4">
         <StatCard label="Người dùng" value={Number(userCount?.n ?? 0)} icon={<Users className="h-4 w-4 text-amber-300" />} sub="Tổng cộng" />
         <StatCard label="Server" value={Number(serverCount?.n ?? 0)} icon={<Flag className="h-4 w-4 text-amber-300" />} sub="Tổng cộng" />
+        <StatCard label="Chờ duyệt" value={Number(pendingServerCount?.n ?? 0)} icon={<Clock className="h-4 w-4 text-amber-300" />} sub="Server chờ duyệt" />
         <StatCard label="Banner" value={Number(bannerCount?.n ?? 0)} icon={<ImageIcon className="h-4 w-4 text-amber-300" />} sub="Tổng cộng" />
       </section>
+
 
       <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
         {/* Users */}

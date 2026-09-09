@@ -34,13 +34,17 @@ export default function NguoiDungPage() {
     try {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (search) params.set("search", search);
-      const res = await fetch(`/api/admin/nguoi-dung?${params}`);
+      const res = await fetch(`/api/admin/nguoi-dung?${params}`, { cache: "no-store" });
+      if (res.status === 401 || res.status === 403) {
+        setError("forbidden");
+        return;
+      }
       if (!res.ok) { setError("Không tải được danh sách."); return; }
       const data = (await res.json()) as { users?: UserRow[]; total?: number };
       setUsers(data.users ?? []);
       setTotal(data.total ?? 0);
     } catch {
-      setError("Lỗi kết nối.");
+      setError("Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -121,8 +125,37 @@ export default function NguoiDungPage() {
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-12 text-zinc-400">Đang tải...</div>
+      ) : error === "forbidden" ? (
+        <div className="rounded-2xl border border-red-500/30 bg-red-950/40 p-6 text-center">
+          <p className="text-base font-bold text-red-200">Phiên đăng nhập không có quyền Admin</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Tài khoản hiện tại của bạn không có quyền truy cập hoặc phiên đã hết hạn.
+          </p>
+          <div className="mt-4 flex justify-center gap-3">
+            <a
+              href="/mu-admin/dang-nhap"
+              className="rounded-xl border border-amber-500/40 bg-amber-500/20 px-4 py-2 text-xs font-bold text-amber-200 hover:bg-amber-500/30"
+            >
+              Đăng nhập Admin
+            </a>
+            <button
+              onClick={() => fetchUsers()}
+              className="rounded-xl border border-zinc-700 bg-black/40 px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
       ) : error ? (
-        <div className="rounded-md border border-red-700/50 bg-red-950/40 p-4 text-red-200">{error}</div>
+        <div className="rounded-md border border-red-700/50 bg-red-950/40 p-4 text-red-200">
+          <p>{error}</p>
+          <button
+            onClick={() => fetchUsers()}
+            className="mt-2 text-xs text-amber-300 underline"
+          >
+            Thử lại
+          </button>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

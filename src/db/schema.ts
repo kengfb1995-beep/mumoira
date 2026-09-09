@@ -40,7 +40,7 @@ export const servers = sqliteTable("servers", {
     .default("none"),
   status: text("status", { enum: ["draft", "pending", "active", "archived", "rejected"] })
     .notNull()
-    .default("pending"),
+    .default("active"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),

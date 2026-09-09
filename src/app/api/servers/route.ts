@@ -84,7 +84,7 @@ export async function POST(req: Request) {
         alphaTestDate: parseDatetimeLocalAsVietnam(body.alphaTestDate),
         facebookUrl: body.facebookUrl || null,
         zaloUrl: body.zaloUrl || null,
-        status: "pending",
+        status: "active",
         slug: baseSlug,
       })
       .returning({ id: servers.id, name: servers.name });
