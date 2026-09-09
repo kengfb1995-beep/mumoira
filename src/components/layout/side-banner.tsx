@@ -68,14 +68,21 @@ export async function SideBanner({ side }: SideBannerProps) {
               )}
             </a>
           ) : (
-            <div
+            <a
               key={`empty-${side}-${idx}`}
-              className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-amber-500/35 bg-black/30 text-center"
+              href="/tai-khoan/mua-dich-vu"
+              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-amber-500/35 bg-black/30 p-2 text-center transition hover:border-amber-400 hover:bg-amber-950/20 group cursor-pointer"
               style={{ aspectRatio: `${BANNER_SIDE.w} / ${BANNER_SIDE.h}` }}
+              title="Vị trí còn trống — Bấm để thuê banner"
             >
-              <Sparkles className="h-4 w-4 text-amber-400/70" aria-hidden="true" />
-              <p className="text-[10px] font-medium leading-tight text-amber-100/90">Trống</p>
-            </div>
+              <Sparkles className="h-5 w-5 text-amber-400/80 group-hover:scale-110 transition" aria-hidden="true" />
+              <p className="text-[11px] font-bold text-amber-200/90 group-hover:text-amber-100">
+                Thuê vị trí này
+              </p>
+              <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[9px] font-semibold text-amber-300">
+                204×390 px
+              </span>
+            </a>
           ),
         )}
       </div>

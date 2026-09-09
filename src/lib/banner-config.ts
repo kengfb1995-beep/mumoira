@@ -23,13 +23,14 @@ export type PurchasableBannerService =
   | "banner_left_sidebar"
   | "banner_right_sidebar"
   | "banner_center_top"
-  | "banner_center_mid"
-  | "banner_vip_gold";
+  | "banner_center_mid";
 
 export const BANNER_SERVICE_SPECS: Record<
   PurchasableBannerService,
-  { w: number; h: number; position: "left_sidebar" | "right_sidebar" | "center_top" | "center_mid" | "vip_gold" }
-> = {
+  { w: number; h: number; position: "left_sidebar" | "right_sidebar" | "center_top" | "center_mid" }
+> & {
+  banner_vip_gold: { w: number; h: number; position: "vip_gold" };
+} = {
   banner_center_top: { ...BANNER_TOP, position: "center_top" },
   banner_center_mid: { ...BANNER_MIDDLE, position: "center_mid" },
   banner_left_sidebar: { ...BANNER_SIDE, position: "left_sidebar" },

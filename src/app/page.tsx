@@ -239,7 +239,12 @@ function ServerRow({
         {variant === "vip" ? (
           <div className="w-full min-w-0">
             <div className="w-full min-w-0 overflow-hidden rounded border border-amber-400/60 bg-black/20">
-              <a href={href} className="block w-full min-w-0">
+              <a
+                href={server.websiteUrl || href}
+                target={server.websiteUrl ? "_blank" : undefined}
+                rel={server.websiteUrl ? "noopener noreferrer" : undefined}
+                className="block w-full min-w-0"
+              >
                 <div
                   className="relative w-full overflow-hidden rounded-sm border border-zinc-800/80 bg-[#0d0505]"
                   style={{ aspectRatio: `${BANNER_VIP_GOLD.w} / ${BANNER_VIP_GOLD.h}` }}
@@ -248,7 +253,7 @@ function ServerRow({
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={server.bannerUrl}
-                      alt=""
+                      alt={server.name}
                       width={BANNER_VIP_GOLD.w}
                       height={BANNER_VIP_GOLD.h}
                       className="absolute inset-0 h-full w-full object-cover"
@@ -630,26 +635,45 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </div>
 
         {/* Danh sách Mu VIP Vàng */}
-        {vipGoldServers.length > 0 ? (
-          <section className="w-full overflow-hidden rounded-md border border-amber-400/70 bg-[#fffdf0] shadow-md shadow-amber-500/10">
-            <div className="flex items-center justify-between border-b border-amber-300/90 bg-gradient-to-r from-[#ffeaa7] via-[#fff3c4] to-[#ffeaa7] px-2.5 py-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-red-600 text-sm" aria-hidden>◆</span>
-                <h2 className="text-sm font-extrabold uppercase tracking-wide text-zinc-900 sm:text-[15px]">
-                  Danh Sách Mu VIP Vàng
-                </h2>
-              </div>
-              <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-900 border border-amber-600/30">
+        <section className="w-full overflow-hidden rounded-md border border-amber-400/70 bg-[#fffdf0] shadow-md shadow-amber-500/10">
+          <div className="flex items-center justify-between border-b border-amber-300/90 bg-gradient-to-r from-[#ffeaa7] via-[#fff3c4] to-[#ffeaa7] px-2.5 py-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-red-600 text-sm" aria-hidden>◆</span>
+              <h2 className="text-sm font-extrabold uppercase tracking-wide text-zinc-900 sm:text-[15px]">
+                Danh Sách Mu VIP Vàng
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline-block rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-900 border border-amber-600/30">
                 HOT PREMIUM
               </span>
+              <a
+                href="/tai-khoan/mua-dich-vu"
+                className="inline-flex items-center gap-1 rounded bg-gradient-to-r from-red-600 to-amber-600 px-2.5 py-1 text-[11px] font-black uppercase text-white shadow-sm hover:brightness-110 transition active:scale-95"
+                title="Thuê vị trí VIP Vàng 468×68"
+              >
+                <span>👑 Thuê VIP Vàng</span>
+              </a>
             </div>
-            <div className="space-y-1.5 p-1.5 sm:space-y-2 sm:p-2">
-              {vipGoldServers.map((server, idx) => (
+          </div>
+          <div className="space-y-1.5 p-1.5 sm:space-y-2 sm:p-2">
+            {vipGoldServers.length > 0 ? (
+              vipGoldServers.map((server, idx) => (
                 <ServerRow key={server.id} server={server} index={idx + 1} variant="vip" now={now} />
-              ))}
-            </div>
-          </section>
-        ) : null}
+              ))
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded border border-dashed border-amber-400/60 bg-amber-50/60 text-amber-900 text-xs font-medium">
+                <p>⭐ Chưa có máy chủ trong danh sách VIP Vàng. Vị trí vàng tiếp cận hàng ngàn game thủ mỗi ngày!</p>
+                <a
+                  href="/tai-khoan/mua-dich-vu"
+                  className="rounded bg-amber-500 px-3 py-1 text-xs font-bold text-black hover:bg-amber-400 transition shrink-0"
+                >
+                  Đăng ký ngay
+                </a>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Danh sách Miễn Phí & VIP Bạc */}
         <section className="w-full">

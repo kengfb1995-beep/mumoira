@@ -9,7 +9,9 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Copy,
   Crown,
+  Edit,
   ExternalLink,
   Eye,
   Filter,
@@ -70,10 +72,52 @@ export default function ServerPage() {
 
   // Filters
   const [search, setSearch] = useState("");
-  const [tabFilter, setTabFilter] = useState<"all" | "pending" | "active" | "vip" | "rejected">("all");
+  const [tabFilter, setTabFilter] = useState<"all" | "pending" | "active" | "vip" | "vip_gold" | "rejected">("all");
 
   // Detail Modal
   const [detailServer, setDetailServer] = useState<ServerRow | null>(null);
+
+  // Edit Server Modal
+  const [editServer, setEditServer] = useState<ServerRow | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    websiteUrl: "",
+    bannerUrl: "",
+    vipPackageType: "none",
+    status: "active",
+    version: "Season 6",
+    exp: "x9999",
+    drop: "50%",
+    facebookUrl: "",
+    zaloUrl: "",
+    openBetaDate: "",
+    alphaTestDate: "",
+    content: "",
+    seoKeywords: "",
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  // Create Server Modal
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    websiteUrl: "",
+    bannerUrl: "",
+    vipPackageType: "vip_gold",
+    status: "active",
+    version: "Season 6",
+    exp: "x9999",
+    drop: "50%",
+    facebookUrl: "",
+    zaloUrl: "",
+    openBetaDate: "",
+    alphaTestDate: "",
+    content: "",
+    seoKeywords: "",
+  });
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   const fetchServers = useCallback(async () => {
     setLoading(true);
@@ -109,7 +153,143 @@ export default function ServerPage() {
     }
   }, [actionSuccess]);
 
-  async function updateServer(id: number, patch: { status?: string; vipPackageType?: string }) {
+  function formatDateInput(d?: string | number | null) {
+    if (!d) return "";
+    try {
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return "";
+      return date.toISOString().slice(0, 16);
+    } catch {
+      return "";
+    }
+  }
+
+  function openEditModal(s: ServerRow) {
+    setEditServer(s);
+    setEditForm({
+      name: s.name,
+      websiteUrl: s.websiteUrl,
+      bannerUrl: s.bannerUrl || "",
+      vipPackageType: s.vipPackageType,
+      status: s.status,
+      version: s.version,
+      exp: s.exp,
+      drop: s.drop,
+      facebookUrl: s.facebookUrl || "",
+      zaloUrl: s.zaloUrl || "",
+      openBetaDate: formatDateInput(s.openBetaDate),
+      alphaTestDate: formatDateInput(s.alphaTestDate),
+      content: s.content || "",
+      seoKeywords: s.seoKeywords || "",
+    });
+    setEditError("");
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editServer) return;
+    if (!editForm.name.trim()) {
+      setEditError("Vui lòng nhập tên server!");
+      return;
+    }
+    if (!editForm.websiteUrl.trim()) {
+      setEditError("Vui lòng nhập link website!");
+      return;
+    }
+
+    setEditSubmitting(true);
+    setEditError("");
+    try {
+      const res = await fetch("/api/admin/server", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editServer.id,
+          name: editForm.name.trim(),
+          websiteUrl: editForm.websiteUrl.trim(),
+          bannerUrl: editForm.bannerUrl.trim() || null,
+          vipPackageType: editForm.vipPackageType,
+          status: editForm.status,
+          version: editForm.version.trim(),
+          exp: editForm.exp.trim(),
+          drop: editForm.drop.trim(),
+          facebookUrl: editForm.facebookUrl.trim() || null,
+          zaloUrl: editForm.zaloUrl.trim() || null,
+          openBetaDate: editForm.openBetaDate ? new Date(editForm.openBetaDate).getTime() : null,
+          alphaTestDate: editForm.alphaTestDate ? new Date(editForm.alphaTestDate).getTime() : null,
+          content: editForm.content,
+          seoKeywords: editForm.seoKeywords,
+        }),
+      });
+
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) {
+        setEditError(data.message || "Cập nhật server thất bại");
+        return;
+      }
+
+      setEditServer(null);
+      setActionSuccess(`Đã lưu thành công server #${editServer.id}!`);
+      await fetchServers();
+    } catch {
+      setEditError("Lỗi kết nối máy chủ");
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
+
+  async function handleSaveCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!createForm.name.trim()) {
+      setCreateError("Vui lòng nhập tên server!");
+      return;
+    }
+    if (!createForm.websiteUrl.trim()) {
+      setCreateError("Vui lòng nhập link website!");
+      return;
+    }
+
+    setCreateSubmitting(true);
+    setCreateError("");
+    try {
+      const res = await fetch("/api/admin/server", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: createForm.name.trim(),
+          websiteUrl: createForm.websiteUrl.trim(),
+          bannerUrl: createForm.bannerUrl.trim() || null,
+          vipPackageType: createForm.vipPackageType,
+          status: createForm.status,
+          version: createForm.version.trim(),
+          exp: createForm.exp.trim(),
+          drop: createForm.drop.trim(),
+          facebookUrl: createForm.facebookUrl.trim() || null,
+          zaloUrl: createForm.zaloUrl.trim() || null,
+          openBetaDate: createForm.openBetaDate ? new Date(createForm.openBetaDate).getTime() : null,
+          alphaTestDate: createForm.alphaTestDate ? new Date(createForm.alphaTestDate).getTime() : null,
+          content: createForm.content,
+          seoKeywords: createForm.seoKeywords,
+        }),
+      });
+
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) {
+        setCreateError(data.message || "Tạo server thất bại");
+        return;
+      }
+
+      setShowCreateModal(false);
+      setActionSuccess("Đã thêm server mới thành công!");
+      await fetchServers();
+    } catch {
+      setCreateError("Lỗi kết nối máy chủ");
+    } finally {
+      setCreateSubmitting(false);
+    }
+  }
+
+  async function updateServer(id: number, patch: Partial<ServerRow>) {
     setUpdating(id);
     try {
       const res = await fetch("/api/admin/server", {
@@ -202,6 +382,7 @@ export default function ServerPage() {
       // Tab filter
       if (tabFilter === "pending" && s.status !== "pending") return false;
       if (tabFilter === "active" && s.status !== "active") return false;
+      if (tabFilter === "vip_gold" && s.vipPackageType !== "vip_gold") return false;
       if (tabFilter === "vip" && s.vipPackageType === "none") return false;
       if (tabFilter === "rejected" && s.status !== "rejected" && s.status !== "archived") return false;
 
@@ -211,8 +392,9 @@ export default function ServerPage() {
         const matchesName = s.name?.toLowerCase().includes(q);
         const matchesVersion = s.version?.toLowerCase().includes(q);
         const matchesEmail = s.userEmail?.toLowerCase().includes(q);
+        const matchesWeb = s.websiteUrl?.toLowerCase().includes(q);
         const matchesId = String(s.id).includes(q);
-        if (!matchesName && !matchesVersion && !matchesEmail && !matchesId) return false;
+        if (!matchesName && !matchesVersion && !matchesEmail && !matchesWeb && !matchesId) return false;
       }
 
       return true;
@@ -293,6 +475,34 @@ export default function ServerPage() {
             </button>
           )}
 
+          {/* Add server button */}
+          <button
+            onClick={() => {
+              setCreateForm({
+                name: "",
+                websiteUrl: "",
+                bannerUrl: "",
+                vipPackageType: "vip_gold",
+                status: "active",
+                version: "Season 6",
+                exp: "x9999",
+                drop: "50%",
+                facebookUrl: "",
+                zaloUrl: "",
+                openBetaDate: "",
+                alphaTestDate: "",
+                content: "",
+                seoKeywords: "",
+              });
+              setCreateError("");
+              setShowCreateModal(true);
+            }}
+            className="flex items-center gap-1.5 rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-500/30 via-red-950/40 to-amber-500/20 px-3.5 py-2 text-xs font-bold text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:brightness-125 transition"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Thêm Server Mới</span>
+          </button>
+
           {/* Refresh button */}
           <button
             onClick={() => fetchServers()}
@@ -370,11 +580,15 @@ export default function ServerPage() {
 
         {/* VIP Gold */}
         <div
-          onClick={() => setTabFilter("vip")}
-          className="cursor-pointer rounded-2xl border border-yellow-500/20 bg-black/40 p-4 transition hover:border-yellow-500/40"
+          onClick={() => setTabFilter("vip_gold")}
+          className={`cursor-pointer rounded-2xl border p-4 transition ${
+            tabFilter === "vip_gold"
+              ? "border-yellow-400 bg-yellow-950/40 shadow-[0_0_20px_rgba(234,179,8,0.2)]"
+              : "border-yellow-500/30 bg-black/40 hover:border-yellow-400/60"
+          }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-yellow-300">VIP Vàng</span>
+            <span className="text-xs font-bold text-yellow-300">VIP Vàng 👑</span>
             <Crown className="h-4 w-4 text-yellow-400" />
           </div>
           <p className="mt-2 text-2xl font-black text-yellow-300 tabular-nums">{stats.vipGold}</p>
@@ -399,20 +613,19 @@ export default function ServerPage() {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between rounded-2xl border border-amber-500/20 bg-black/40 p-3">
         {/* Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-          {(
-            [
-              { id: "all", label: "Tất cả", count: stats.total },
-              { id: "pending", label: "Chờ duyệt", count: stats.pending, highlight: stats.pending > 0 },
-              { id: "active", label: "Hoạt động", count: stats.active },
-              { id: "vip", label: "Server VIP", count: stats.vipGold + stats.vipSilver },
-              { id: "rejected", label: "Từ chối / Khác" },
-            ] as const
-          ).map((tab) => {
+          {[
+            { id: "all" as const, label: "Tất cả", count: stats.total, highlight: false },
+            { id: "pending" as const, label: "Chờ duyệt", count: stats.pending, highlight: stats.pending > 0 },
+            { id: "vip_gold" as const, label: "👑 VIP Vàng", count: stats.vipGold, highlight: false },
+            { id: "vip" as const, label: "VIP (Tất cả)", count: stats.vipGold + stats.vipSilver, highlight: false },
+            { id: "active" as const, label: "Hoạt động", count: stats.active, highlight: false },
+            { id: "rejected" as const, label: "Từ chối / Khác", count: undefined, highlight: false },
+          ].map((tab) => {
             const active = tabFilter === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setTabFilter(tab.id as any)}
+                onClick={() => setTabFilter(tab.id)}
                 className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
                   active
                     ? "border border-amber-500/50 bg-gradient-to-r from-amber-500/25 to-red-950/40 text-amber-100 shadow-sm"
@@ -420,7 +633,7 @@ export default function ServerPage() {
                 }`}
               >
                 <span>{tab.label}</span>
-                {"count" in tab && tab.count !== undefined && (
+                {tab.count !== undefined && (
                   <span
                     className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
                       tab.highlight
@@ -550,6 +763,35 @@ export default function ServerPage() {
                                 </a>
                               )}
                             </div>
+
+                            {/* VIP Vàng Banner preview in table */}
+                            {s.vipPackageType === "vip_gold" && (
+                              <div className="mt-2">
+                                {s.bannerUrl ? (
+                                  <div
+                                    className="relative h-7 w-28 overflow-hidden rounded border border-amber-500/50 bg-black/60 shadow-sm cursor-pointer hover:border-amber-400"
+                                    onClick={() => openEditModal(s)}
+                                    title="Ảnh banner VIP Vàng 468×68 (Bấm để sửa link ảnh)"
+                                  >
+                                    <img
+                                      src={s.bannerUrl}
+                                      alt="Banner VIP"
+                                      className="h-full w-full object-cover"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => openEditModal(s)}
+                                    className="inline-flex items-center gap-1 rounded border border-dashed border-amber-500/40 bg-amber-950/20 px-2 py-0.5 text-[10px] text-amber-300 hover:bg-amber-900/30"
+                                    title="Chưa có link ảnh banner VIP Vàng - Bấm để thêm"
+                                  >
+                                    <Plus className="h-2.5 w-2.5" />
+                                    <span>Thêm banner 468×68</span>
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -654,6 +896,15 @@ export default function ServerPage() {
                               </button>
                             </>
                           )}
+
+                          {/* Edit Server Button */}
+                          <button
+                            onClick={() => openEditModal(s)}
+                            className="flex items-center justify-center rounded-lg border border-amber-500/50 bg-amber-500/20 p-1.5 text-amber-200 hover:bg-amber-500/35 transition"
+                            title="Sửa Link Website, Banner VIP Vàng & Thông tin Server"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
 
                           {/* View details */}
                           <button
@@ -822,6 +1073,18 @@ export default function ServerPage() {
               </button>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const s = detailServer;
+                    setDetailServer(null);
+                    openEditModal(s);
+                  }}
+                  className="flex items-center gap-1 rounded-xl border border-amber-500/60 bg-amber-500/20 px-3.5 py-2 text-xs font-bold text-amber-200 hover:bg-amber-500/30 transition"
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                  <span>Sửa Server / VIP</span>
+                </button>
+
                 {detailServer.status === "pending" && (
                   <button
                     onClick={() => updateServer(detailServer.id, { status: "active" })}
@@ -839,6 +1102,461 @@ export default function ServerPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT SERVER & VIP MODAL */}
+      {editServer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-amber-500/40 bg-[#120808] p-5 sm:p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-amber-500/20 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-300">
+                  <Edit className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-amber-100 flex items-center gap-2">
+                    Sửa Server #{editServer.id}
+                    {editForm.vipPackageType === "vip_gold" && (
+                      <span className="rounded bg-yellow-500/20 border border-yellow-500/40 px-1.5 py-0.2 text-[10px] font-bold text-yellow-300">
+                        👑 VIP Vàng
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Chỉnh sửa Link Website, Banner VIP Vàng, Gói VIP và thông tin hiển thị.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditServer(null)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-black/50 hover:text-zinc-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 pt-4 text-xs">
+              {editError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-950/50 p-3 text-red-300">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              {/* Row 1: Name & VIP Package */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block font-bold text-amber-200">
+                    Tên Server <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="MU Sài Gòn, MU Hà Nội..."
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block font-bold text-amber-200">
+                    Gói VIP hiển thị
+                  </label>
+                  <select
+                    value={editForm.vipPackageType}
+                    onChange={(e) => setEditForm({ ...editForm, vipPackageType: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-amber-300 font-bold focus:border-amber-400 focus:outline-none"
+                  >
+                    <option value="vip_gold" className="bg-[#120808] text-amber-300 font-bold">VIP Vàng 👑 (Có banner 468×68 & Vị trí top)</option>
+                    <option value="vip_silver" className="bg-[#120808] text-zinc-200">VIP Bạc 🛡️ (Nổi bật)</option>
+                    <option value="none" className="bg-[#120808] text-zinc-400">Không VIP (Miễn phí)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Website URL */}
+              <div>
+                <label className="mb-1.5 block font-bold text-amber-200">
+                  Link Website Server (Trang chủ / Đăng ký) <span className="text-red-400">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editForm.websiteUrl}
+                    onChange={(e) => setEditForm({ ...editForm, websiteUrl: e.target.value })}
+                    className="flex-1 rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="https://mumoira.net"
+                  />
+                  {editForm.websiteUrl.trim() && (
+                    <a
+                      href={editForm.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 rounded-xl border border-zinc-700 bg-black/40 px-3 py-2 text-zinc-300 hover:text-amber-200 transition"
+                      title="Mở thử link web"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Thử</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 3: Banner URL VIP Vàng (468x68) */}
+              <div className="rounded-xl border border-amber-500/25 bg-black/30 p-3 space-y-2">
+                <label className="block font-bold text-amber-300">
+                  Link Ảnh Banner VIP Vàng (Kích thước khuyến nghị: 468×68 px)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.bannerUrl}
+                  onChange={(e) => setEditForm({ ...editForm, bannerUrl: e.target.value })}
+                  className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  placeholder="https://... ảnh banner ngang (JPG, PNG, GIF, WebP)"
+                />
+
+                {/* Live 468x68 Preview */}
+                {editForm.bannerUrl.trim() ? (
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (468×68):</span>
+                    <div className="relative w-full max-w-[468px] h-[68px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
+                      <img
+                        src={editForm.bannerUrl}
+                        alt="VIP Banner Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-zinc-500 italic">
+                    Server VIP Vàng sẽ hiển thị banner ngang 468×68 trên trang chủ. Nếu để trống sẽ hiển thị khung placeholder.
+                  </p>
+                )}
+              </div>
+
+              {/* Row 4: Status & Version & EXP/Drop */}
+              <div className="grid gap-3 sm:grid-cols-4">
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Trạng thái</label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  >
+                    <option value="active">Hoạt động (Active)</option>
+                    <option value="pending">Chờ duyệt (Pending)</option>
+                    <option value="rejected">Từ chối (Rejected)</option>
+                    <option value="archived">Lưu trữ (Archived)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Phiên bản</label>
+                  <input
+                    type="text"
+                    value={editForm.version}
+                    onChange={(e) => setEditForm({ ...editForm, version: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="Season 6"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">EXP</label>
+                  <input
+                    type="text"
+                    value={editForm.exp}
+                    onChange={(e) => setEditForm({ ...editForm, exp: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="x9999"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Drop</label>
+                  <input
+                    type="text"
+                    value={editForm.drop}
+                    onChange={(e) => setEditForm({ ...editForm, drop: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="50%"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5: Zalo & Facebook */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Link / SĐT Zalo</label>
+                  <input
+                    type="text"
+                    value={editForm.zaloUrl}
+                    onChange={(e) => setEditForm({ ...editForm, zaloUrl: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="https://zalo.me/... hoặc SĐT"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Link Fanpage / Group FB</label>
+                  <input
+                    type="text"
+                    value={editForm.facebookUrl}
+                    onChange={(e) => setEditForm({ ...editForm, facebookUrl: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="https://facebook.com/..."
+                  />
+                </div>
+              </div>
+
+              {/* Row 6: Dates */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Ngày Alpha Test</label>
+                  <input
+                    type="datetime-local"
+                    value={editForm.alphaTestDate}
+                    onChange={(e) => setEditForm({ ...editForm, alphaTestDate: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-1.5 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Ngày Open Beta</label>
+                  <input
+                    type="datetime-local"
+                    value={editForm.openBetaDate}
+                    onChange={(e) => setEditForm({ ...editForm, openBetaDate: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-1.5 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Row 7: SEO Keywords */}
+              <div>
+                <label className="mb-1 block font-bold text-zinc-300">Từ khóa SEO (cách nhau bởi dấu phẩy)</label>
+                <input
+                  type="text"
+                  value={editForm.seoKeywords}
+                  onChange={(e) => setEditForm({ ...editForm, seoKeywords: e.target.value })}
+                  className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  placeholder="mu moi ra, mu season 6, mu open hom nay..."
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-2 border-t border-amber-500/20 pt-3.5">
+                <button
+                  type="button"
+                  onClick={() => setEditServer(null)}
+                  className="rounded-xl border border-zinc-700 bg-black/40 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-500 via-amber-600 to-red-700 px-5 py-2 text-xs font-bold text-black hover:brightness-110 transition disabled:opacity-50"
+                >
+                  {editSubmitting ? "Đang lưu..." : "Lưu Thay Đổi"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE SERVER MODAL */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-amber-500/40 bg-[#120808] p-5 sm:p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-amber-500/20 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-300">
+                  <Plus className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-amber-100 flex items-center gap-2">
+                    Thêm Server Mới / Gán VIP Vàng
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Tạo trực tiếp máy chủ và gắn gói VIP Vàng kèm ảnh banner 468×68.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-black/50 hover:text-zinc-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCreate} className="space-y-4 pt-4 text-xs">
+              {createError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-950/50 p-3 text-red-300">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{createError}</span>
+                </div>
+              )}
+
+              {/* Row 1: Name & VIP Package */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block font-bold text-amber-200">
+                    Tên Server <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={createForm.name}
+                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="MU Sài Gòn, MU Hà Nội..."
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block font-bold text-amber-200">
+                    Gói VIP hiển thị
+                  </label>
+                  <select
+                    value={createForm.vipPackageType}
+                    onChange={(e) => setCreateForm({ ...createForm, vipPackageType: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-amber-300 font-bold focus:border-amber-400 focus:outline-none"
+                  >
+                    <option value="vip_gold" className="bg-[#120808] text-amber-300 font-bold">VIP Vàng 👑 (Có banner 468×68 & Vị trí top)</option>
+                    <option value="vip_silver" className="bg-[#120808] text-zinc-200">VIP Bạc 🛡️ (Nổi bật)</option>
+                    <option value="none" className="bg-[#120808] text-zinc-400">Không VIP (Miễn phí)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Website URL */}
+              <div>
+                <label className="mb-1.5 block font-bold text-amber-200">
+                  Link Website Server (Trang chủ / Đăng ký) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={createForm.websiteUrl}
+                  onChange={(e) => setCreateForm({ ...createForm, websiteUrl: e.target.value })}
+                  className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  placeholder="https://mumoira.net"
+                />
+              </div>
+
+              {/* Row 3: Banner URL VIP Vàng (468x68) */}
+              <div className="rounded-xl border border-amber-500/25 bg-black/30 p-3 space-y-2">
+                <label className="block font-bold text-amber-300">
+                  Link Ảnh Banner VIP Vàng (Kích thước khuyến nghị: 468×68 px)
+                </label>
+                <input
+                  type="text"
+                  value={createForm.bannerUrl}
+                  onChange={(e) => setCreateForm({ ...createForm, bannerUrl: e.target.value })}
+                  className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  placeholder="https://... ảnh banner ngang (JPG, PNG, GIF, WebP)"
+                />
+
+                {/* Live 468x68 Preview */}
+                {createForm.bannerUrl.trim() && (
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-zinc-400">Xem trước khung hiển thị banner VIP Vàng (468×68):</span>
+                    <div className="relative w-full max-w-[468px] h-[68px] overflow-hidden rounded border border-amber-500/50 bg-[#0d0505] shadow-md flex items-center justify-center">
+                      <img
+                        src={createForm.bannerUrl}
+                        alt="VIP Banner Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Row 4: Status & Version & EXP/Drop */}
+              <div className="grid gap-3 sm:grid-cols-4">
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Trạng thái</label>
+                  <select
+                    value={createForm.status}
+                    onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                  >
+                    <option value="active">Hoạt động (Active)</option>
+                    <option value="pending">Chờ duyệt (Pending)</option>
+                    <option value="rejected">Từ chối (Rejected)</option>
+                    <option value="archived">Lưu trữ (Archived)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Phiên bản</label>
+                  <input
+                    type="text"
+                    value={createForm.version}
+                    onChange={(e) => setCreateForm({ ...createForm, version: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="Season 6"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">EXP</label>
+                  <input
+                    type="text"
+                    value={createForm.exp}
+                    onChange={(e) => setCreateForm({ ...createForm, exp: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="x9999"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Drop</label>
+                  <input
+                    type="text"
+                    value={createForm.drop}
+                    onChange={(e) => setCreateForm({ ...createForm, drop: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-2.5 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="50%"
+                  />
+                </div>
+              </div>
+
+              {/* Row 5: Zalo & Facebook */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Link / SĐT Zalo</label>
+                  <input
+                    type="text"
+                    value={createForm.zaloUrl}
+                    onChange={(e) => setCreateForm({ ...createForm, zaloUrl: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="https://zalo.me/... hoặc SĐT"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-bold text-zinc-300">Link Fanpage / Group FB</label>
+                  <input
+                    type="text"
+                    value={createForm.facebookUrl}
+                    onChange={(e) => setCreateForm({ ...createForm, facebookUrl: e.target.value })}
+                    className="w-full rounded-xl border border-amber-500/30 bg-black/60 px-3 py-2 text-xs text-zinc-200 focus:border-amber-400 focus:outline-none"
+                    placeholder="https://facebook.com/..."
+                  />
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-2 border-t border-amber-500/20 pt-3.5">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-xl border border-zinc-700 bg-black/40 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={createSubmitting}
+                  className="rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-500 via-amber-600 to-red-700 px-5 py-2 text-xs font-bold text-black hover:brightness-110 transition disabled:opacity-50"
+                >
+                  {createSubmitting ? "Đang lưu..." : "Tạo Server"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
