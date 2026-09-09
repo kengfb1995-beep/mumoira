@@ -24,10 +24,20 @@ const createServerSchema = z.object({
   zaloUrl: z.string().max(200).optional(),
 });
 
-const updateDateSchema = z.object({
+const updateServerSchema = z.object({
   id: z.number().int().positive(),
-  openBetaDate: z.string().min(16),
-  alphaTestDate: z.string().min(16),
+  name: z.string().min(2).max(120).optional(),
+  version: z.string().min(1).max(30).optional(),
+  exp: z.string().min(1).max(30).optional(),
+  drop: z.string().min(1).max(30).optional(),
+  websiteUrl: z.string().refine((v) => /^https?:\/\/.+/.test(v), "Website phải bắt đầu bằng http:// hoặc https://").optional(),
+  bannerUrl: z.string().nullable().optional(),
+  facebookUrl: z.string().max(300).nullable().optional(),
+  zaloUrl: z.string().max(200).nullable().optional(),
+  content: z.string().min(10).max(10000).optional(),
+  seoKeywords: z.string().max(500).optional(),
+  openBetaDate: z.string().min(16).optional(),
+  alphaTestDate: z.string().min(16).optional(),
 });
 
 export async function POST(req: Request) {
@@ -120,7 +130,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "Bạn cần đăng nhập" }, { status: 401 });
     }
 
-    const body = updateDateSchema.parse(await req.json());
+    const body = updateServerSchema.parse(await req.json());
     const db = getDb();
 
     const found = await db
@@ -133,12 +143,50 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "Không tìm thấy server của bạn" }, { status: 404 });
     }
 
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (body.name !== undefined) {
+      updateData.name = body.name.trim();
+    }
+    if (body.version !== undefined) {
+      updateData.version = body.version.trim();
+    }
+    if (body.exp !== undefined) {
+      updateData.exp = body.exp.trim();
+    }
+    if (body.drop !== undefined) {
+      updateData.drop = body.drop.trim();
+    }
+    if (body.websiteUrl !== undefined) {
+      updateData.websiteUrl = body.websiteUrl.trim();
+    }
+    if (body.bannerUrl !== undefined) {
+      updateData.bannerUrl = body.bannerUrl ? body.bannerUrl.trim() : null;
+    }
+    if (body.facebookUrl !== undefined) {
+      updateData.facebookUrl = body.facebookUrl ? body.facebookUrl.trim() : null;
+    }
+    if (body.zaloUrl !== undefined) {
+      updateData.zaloUrl = body.zaloUrl ? body.zaloUrl.trim() : null;
+    }
+    if (body.content !== undefined) {
+      updateData.content = body.content.trim();
+    }
+    if (body.seoKeywords !== undefined) {
+      updateData.seoKeywords = body.seoKeywords.trim();
+    }
+    if (body.openBetaDate) {
+      updateData.openBetaDate = parseDatetimeLocalAsVietnam(body.openBetaDate);
+    }
+    if (body.alphaTestDate) {
+      updateData.alphaTestDate = parseDatetimeLocalAsVietnam(body.alphaTestDate);
+    }
+
     await db
       .update(servers)
-      .set({
-        openBetaDate: parseDatetimeLocalAsVietnam(body.openBetaDate),
-        alphaTestDate: parseDatetimeLocalAsVietnam(body.alphaTestDate),
-      })
+      .set(updateData)
       .where(eq(servers.id, body.id));
 
     return NextResponse.json({ ok: true });
@@ -147,6 +195,6 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "Dữ liệu không hợp lệ", issues: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json({ message: "Cập nhật ngày Open/Alpha thất bại" }, { status: 500 });
+    return NextResponse.json({ message: "Cập nhật máy chủ thất bại" }, { status: 500 });
   }
 }

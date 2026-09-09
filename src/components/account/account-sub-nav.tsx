@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Lock, Receipt, Server, ShoppingBag, Sparkles, Wallet } from "lucide-react";
+import { Bell, ImageIcon, Lock, Receipt, Server, ShoppingBag, Sparkles, Wallet } from "lucide-react";
 
 const links: { href: string; label: string; icon: React.ElementType; match?: (path: string) => boolean }[] = [
   { href: "/tai-khoan/tong-quan", label: "Tổng quan", icon: Sparkles },
@@ -14,6 +14,7 @@ const links: { href: string; label: string; icon: React.ElementType; match?: (pa
   },
   { href: "/tai-khoan/mua-dich-vu", label: "Mua dịch vụ", icon: ShoppingBag },
   { href: "/tai-khoan/server", label: "Server của tôi", icon: Server },
+  { href: "/tai-khoan/banner", label: "Banner của tôi", icon: ImageIcon },
   { href: "/tai-khoan/giao-dich", label: "Giao dịch", icon: Receipt },
   { href: "/tai-khoan/bao-mat", label: "Bảo mật", icon: Lock },
   { href: "/tai-khoan/thong-bao", label: "Thông báo", icon: Bell },

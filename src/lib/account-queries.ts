@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { servers, transactions, users } from "@/db/schema";
+import { banners, servers, transactions, users } from "@/db/schema";
 import { getDb } from "@/lib/db";
 
 export async function getAccountProfile(userId: number) {
@@ -31,7 +31,7 @@ export async function getAccountTransactions(userId: number, limit = 30) {
     .limit(limit);
 }
 
-export async function getAccountServers(userId: number, limit = 20) {
+export async function getAccountServers(userId: number, limit = 50) {
   const db = getDb();
   return db
     .select({
@@ -41,9 +41,42 @@ export async function getAccountServers(userId: number, limit = 20) {
       vipPackageType: servers.vipPackageType,
       openBetaDate: servers.openBetaDate,
       alphaTestDate: servers.alphaTestDate,
+      websiteUrl: servers.websiteUrl,
+      bannerUrl: servers.bannerUrl,
+      facebookUrl: servers.facebookUrl,
+      zaloUrl: servers.zaloUrl,
+      version: servers.version,
+      exp: servers.exp,
+      drop: servers.drop,
+      content: servers.content,
+      seoKeywords: servers.seoKeywords,
+      slug: servers.slug,
+      createdAt: servers.createdAt,
     })
     .from(servers)
     .where(eq(servers.userId, userId))
     .orderBy(desc(servers.id))
     .limit(limit);
 }
+
+export async function getAccountBanners(userId: number, limit = 50) {
+  const db = getDb();
+  return db
+    .select({
+      id: banners.id,
+      userId: banners.userId,
+      position: banners.position,
+      imageUrl: banners.imageUrl,
+      targetUrl: banners.targetUrl,
+      startDate: banners.startDate,
+      endDate: banners.endDate,
+      status: banners.status,
+      createdAt: banners.createdAt,
+      updatedAt: banners.updatedAt,
+    })
+    .from(banners)
+    .where(eq(banners.userId, userId))
+    .orderBy(desc(banners.id))
+    .limit(limit);
+}
+
