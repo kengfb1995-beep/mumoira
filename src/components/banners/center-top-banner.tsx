@@ -24,7 +24,7 @@ export async function CenterTopBanner() {
       href={banner.targetUrl}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className="block w-full overflow-hidden rounded-sm border border-amber-500/25 bg-black/20"
+      className="block w-full max-w-[780px] mx-auto overflow-hidden rounded-sm border border-amber-500/25 bg-black/20"
       style={{ aspectRatio: `${BANNER_TOP.w} / ${BANNER_TOP.h}` }}
     >
       {isMp4Url(banner.imageUrl) ? (
@@ -44,7 +44,7 @@ export async function CenterTopBanner() {
           alt="Banner quảng cáo"
           width={BANNER_TOP.w}
           height={BANNER_TOP.h}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover [image-rendering:-webkit-optimize-contrast]"
           loading="eager"
         />
       )}

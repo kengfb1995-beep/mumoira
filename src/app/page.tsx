@@ -237,17 +237,17 @@ function ServerRow({
       {/* Cột 2: banner ngang + tiêu đề — sát nhau như mẫu portal */}
       <div className="min-w-0 min-h-0 flex-1 space-y-0.5">
         {variant === "vip" ? (
-          <div className="w-full min-w-0">
-            <div className="w-full min-w-0 overflow-hidden rounded border border-amber-400/60 bg-black/20">
+          <div className="w-full sm:w-fit max-w-[468px]">
+            <div className="w-full sm:w-fit max-w-[468px] overflow-hidden rounded border border-amber-400/60 bg-black/20">
               <a
                 href={server.websiteUrl || href}
                 target={server.websiteUrl ? "_blank" : undefined}
                 rel={server.websiteUrl ? "noopener noreferrer" : undefined}
-                className="block w-full min-w-0"
+                className="block w-full"
               >
                 <div
-                  className="relative w-full overflow-hidden rounded-sm border border-zinc-800/80 bg-[#0d0505]"
-                  style={{ aspectRatio: `${BANNER_VIP_GOLD.w} / ${BANNER_VIP_GOLD.h}` }}
+                  className="relative w-full overflow-hidden rounded-sm border border-zinc-800/80 bg-[#0d0505] flex items-center justify-center"
+                  style={{ maxWidth: `${BANNER_VIP_GOLD.w}px` }}
                 >
                   {server.bannerUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -256,12 +256,13 @@ function ServerRow({
                       alt={server.name}
                       width={BANNER_VIP_GOLD.w}
                       height={BANNER_VIP_GOLD.h}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="block w-full max-w-[468px] h-auto max-h-[68px] object-contain [image-rendering:-webkit-optimize-contrast]"
+                      loading="lazy"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black text-zinc-600">
-                      <span className="px-2 text-center text-sm text-zinc-400">
-                        Chưa có banner (khuyến nghị {BANNER_VIP_GOLD.w}×{BANNER_VIP_GOLD.h})
+                    <div className="flex h-[68px] w-[468px] max-w-full items-center justify-center bg-gradient-to-br from-zinc-900 to-black text-zinc-600">
+                      <span className="px-2 text-center text-xs text-zinc-400">
+                        Chưa có banner (chuẩn {BANNER_VIP_GOLD.w}×{BANNER_VIP_GOLD.h})
                       </span>
                     </div>
                   )}
